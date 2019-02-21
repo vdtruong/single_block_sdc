@@ -1,29 +1,42 @@
 `timescale 1ns / 1ps
 ///////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company:          Fresenius
+// Engineer:         Van D. Truong
 // 
-// Create Date:    18:17:57 10/05/2012 
+// Create Date:      18:17:57 10/05/2012 
 // Design Name: 
-// Module Name:    sd_host_bus_driver 
+// Module Name:      sd_host_bus_driver 
 // Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
+// Target Devices:   Spartan 6
+// Tool versions:    14.7
+// Description:      The sd_host_bus_driver talks to the PUC directly. It is
+//                   between the PUC and the sd_host_controller.  The
+//                   sd_host_controller talks directly to the SD Card.
 // Dependencies: 
 //
 // Revision: 
 // Revision 0.01 - File Created
-// Additional Comments: The sd_host_bus_driver talks to the PUC directly. It is
-//                      between the PUC and the sd_host_controller.  The 
-//								sd_host_controller talks directly to the SD Card.
+// Additional Comments: 
+//                   1/25/19  Got 16 blocks to write successfully.  Before, the
+//                   last CRC was overwritten in the BRAM.  This happens
+//                   even though the fifo controller did not increment
+//                   to another address.  This is actually why the CRC
+//                   was overwritten.  If the fifo controller had 
+//                   increment to another address, the CRC would have
+//                   not been overwritten.  So we need to investigate
+//                   why we had an extra wr_b_strb to trigger the extra
+//                   write to the BRAM.
+//                       
+//								
 ///////////////////////////////////////////////////////////////////////////////
 module sd_host_bus_driver
-#(parameter BRAM_SYSMEM_FILE 	= "C:/FPGA_Design/sd_card_controller/src/BRAM_66_x_64.txt",
-  parameter SM_MEM_SIZE       = 128,
-  parameter SM_ADDR_WD        = 7,
-  parameter SM_DATA_WD        = 64)
+#( //parameter BRAM_SYSMEM_FILE 	= "C:/FPGA_Design/sd_card_controller/src/BRAM_1057_x_64.txt",
+   //parameter BRAM_SYSMEM_FILE 	= "C:/FPGA_Design/sd_card_controller/src/BRAM_1040_x_64.txt",
+   parameter BRAM_SYSMEM_FILE 	= "C:/FPGA_Design/sd_card_controller/src/BRAM_2048_x_64.txt",
+   parameter BRAM_DES_FILE 	   = "C:/FPGA_Design/sd_card_controller/src/BRAM_32_x_64.txt",
+   parameter SM_MEM_SIZE         = 128,
+   parameter SM_ADDR_WD          = 12,
+   parameter SM_DATA_WD          = 64)
  (
 	input 					clk,
 	input						reset,
@@ -35,10 +48,11 @@ module sd_host_bus_driver
 	input						card_inserted_strb, 	
 	// card has been removed and stabilized
 	input						card_removed_strb, 	
-	
 	// manually initialize the sd card
 	input						man_init_sdc_strb,		
 	// test cmd strb from host (ie, CMD8)
+   // This command will send a command without data
+   // to the sd card.  It uses the data signal below for information.
 	input						host_tst_cmd_strb,
 	// finished sending out command to sd card
 	input						end_bit_det_strb,	
@@ -67,39 +81,43 @@ module sd_host_bus_driver
 	// For the first 16 bits, it will be the
 	// Command Register (00Eh) data.
 	input 		[35:0]	data,								 				
-	
 	// for the sd host controller memory map
 	output		[11:0]	rd_reg_index,
 	input 		[127:0]	rd_reg_input,															 
-	
 	output					wr_reg_strb,
 	output		[11:0]	wr_reg_index,
 	output 		[31:0]	wr_reg_output,
 	output 		[2:0]		reg_attr,												  						
-	output reg	[2:0]		kind_of_resp, 	// based on command index
-	
+	output reg	[2:0]		kind_of_resp, 	      // based on command index
 	// Following is for System Memory FIFO.						 
-	//input						strt_fifo_strb;	// start to create descriptor table
-	input						wr_b_strb,			// write puc data to fifo, from puc.
-	input 		[63:0] 	fifo_data,			// data to be logged, from puc.	 
-	output reg           rdy_for_nxt_pkt,	// ready for next packet (fifo_data) from puc.
-	output					fifo_rdy_strb,		// fifo is ready to be used
-	// These ports are used by ADMA2 State Machine						 
-	output					strt_adma_strb,	// Start Fifo transfer to sd card.
+	output				   strt_fifo_strb,	   // start to create the sdc fifo
+	input						wr_b_strb,			   // write puc data to fifo, from puc.
+	input 		[63:0] 	fifo_data,			   // data to be logged, from puc.	 
+	output reg           rdy_for_nxt_pkt,	   // ready for next packet (fifo_data) from puc.
+	output					fifo_rdy_strb,		   // fifo is ready to be used
+	// These ports are used by ADMA2 State Machine
+   input                des_rd_strb,         // fetch a descriptor item
+   output      [63:0]   des_rd_data,         // descriptor item
+	output					strt_adma_strb,	   // Start Fifo transfer to sd card.
    input                strt_snd_data_strb,  // start to send data to sd card.  
-	input						nxt_dat_strb,		// Next data from fifo.
-	output 		[63:0]	sm_rd_data,			// from the system memory ram
-	input 		[31:0] 	sdc_wr_addr,		// sd card write address. 		  
-	output		[15:0]	pkt_crc,				// CRC for 512 bytes from PUC. 
-	input 		[31:0] 	sdc_rd_addr,		// sd card rd address. 		 
-	
-	input						r1_crc7_good_out 	// from sdc_cmd_mod
+	input						new_dat_strb,		   // Next data from fifo.
+	output 		[63:0]	sm_rd_data,			   // from the system memory ram
+	input 		[31:0] 	sdc_wr_addr,		   // sd card write address. 		  
+	output		[15:0]	pkt_crc,				   // CRC for 512 bytes from PUC. 
+	input 		[31:0] 	sdc_rd_addr,		   // sd card rd address. 		 
+	input						r1_crc7_good_out,	   // from sdc_cmd_mod
+   input       [35:0]   tf_mode,             // sd card tranfer mode
+   //input       [5:0]    sdc_cmd_indx,        // command index for sdc command format
+   input                snd_auto_cmd12_strb, // send auto cmd12 to stop multiple blocks transfer
+   input                snd_cmd13_strb,      // send auto cmd13 to poll if sd card is ready for next block
+   output               fin_cmnd_strb        // has finished sending out the command, ready to check response
+	//input					   issue_abort_cmd		
    );
 	 
 	// Registers
 	reg				host_tst_cmd_strb_z1;
 	reg				host_tst_cmd_strb_z2;
-	reg	[15:0]	tf_mode;
+	//reg	[15:0]	tf_mode;
 	reg	[15:0]	command;
    reg 				cmd_with_tf_compl_int;
 	reg	[1:0]		command_type;
@@ -107,10 +125,12 @@ module sd_host_bus_driver
 	reg				cmd_indx_chk_enb;
 	reg				cmd_crc_chk_enb;
 	reg	[1:0]		resp_type_select;
-	reg				issue_cmd_when_busy;
+   reg            iss_abrt_cmd_z1;
+   reg            iss_abrt_cmd_z2;
+	reg				issue_cmd_with_busy;
+	reg		      issue_abort_cmd_flag;
 	reg	[11:0]	tf_blk_size;
-	reg	[15:0]	blk_count;				 
-	//reg	[63:0]	fifo_data;									  
+	reg	[15:0]	blk_count;									  
 	reg	[63:0]	dat_in;		// holds fifo_data for shifting into crc calculator								  
 	reg				calc_crc;	// flag to calculate CRC								  
 	reg				calc_crc_z1;// delay
@@ -152,21 +172,77 @@ module sd_host_bus_driver
 	reg		      fin_crc_calc_strb_reg_z1;
 	reg		      fin_crc_calc_strb_reg_z2;
    reg            stop_recv_pkt;
+   reg            blocks_crc_done_strb_z1;   // delay
+   reg            blocks_crc_done_strb_z2;   // delay
+   reg            blocks_crc_done_strb_z3;   // delay
+   reg   [63:0]	des_word;               	// descriptor word
+   // Use these delays to fill up the descriptor tables.
+   reg            wr_descr_table_strb_z1;    // delay	
+   reg            wr_descr_table_strb_z2;    // delay	
+   reg            wr_descr_table_strb_z3;    // delay	
+   reg            wr_descr_table_strb_z4;    // delay	
+   reg            wr_descr_table_strb_z5;    // delay	
+   reg            wr_descr_table_strb_z6;    // delay	
+   reg            wr_descr_table_strb_z7;    // delay	
+   reg            wr_descr_table_strb_z8;    // delay	
+   reg            wr_descr_table_strb_z9;    // delay	
+   reg            wr_descr_table_strb_z10;   // delay	
+   reg            wr_descr_table_strb_z11;   // delay	
+   reg            wr_descr_table_strb_z12;   // delay	
+   reg            wr_descr_table_strb_z13;   // delay	
+   reg            wr_descr_table_strb_z14;   // delay
+   reg            wr_descr_table_strb_z15;   // delay	
+   reg            wr_descr_table_strb_z16;   // delay 	
+   reg            wr_descr_table_strb_z17;   // delay 	
+   reg            wr_descr_table_strb_z18;   // delay 	
+   reg            wr_descr_table_strb_z19;   // delay 	
+   reg            wr_descr_table_strb_z20;   // delay 	
+   reg            wr_descr_table_strb_z21;   // delay 	
+   reg            wr_descr_table_strb_z22;   // delay 	
+   reg            wr_descr_table_strb_z23;   // delay 	
+   reg            wr_descr_table_strb_z24;   // delay	
+   reg            wr_descr_table_strb_z25;   // delay	
+   reg            wr_descr_table_strb_z26;   // delay	
+   reg            wr_descr_table_strb_z27;   // delay	
+   reg            wr_descr_table_strb_z28;   // delay
+   reg            wr_descr_table_strb_z29;   // delay	
+   reg            wr_descr_table_strb_z30;   // delay	
+   reg            wr_descr_table_strb_z31;   // delay	
+   reg            wr_descr_table_strb_z32;   // delay	
+   reg            wr_descr_table_strb_z33;   // delay
+   reg            wr_descr_table_strb_z34;   // delay	
+   reg            wr_descr_table_strb_z35;   // delay 	
+   reg            wr_descr_table_strb_z36;   // delay 	
+   reg            wr_descr_table_strb_z37;   // delay 	
+   reg            wr_descr_table_strb_z38;   // delay 	
+   reg            wr_descr_table_strb_z39;   // delay 	
+   reg            wr_descr_table_strb_z40;   // delay 	
+   reg            wr_descr_table_strb_z41;   // delay 	
+   reg            wr_descr_table_strb_z42;   // delay 	
+   reg            wr_descr_table_strb_z43;   // delay	
+   reg            wr_descr_table_strb_z44;   // delay	
+   reg            wr_descr_table_strb_z45;   // delay	
+   reg            wr_descr_table_strb_z46;   // delay	
+   reg            wr_descr_table_strb_z47;   // delay
+   
+   reg            snd_cmd13_strb_z1;         // delay
+   reg            snd_cmd13_strb_z2;         // delay
+   reg            snd_cmd13_strb_z3;         // delay
 	
 	// Wires
-	wire	[SM_ADDR_WD-1:0]	sm_rd_addr; // read system memory addr
+   
+   wire                    wr_descr_table_strb; // start to write descriptor tables
+   wire  [4:0]             des_rd_addr;
+   wire  [4:0]             des_wr_addr;
+	wire	[SM_ADDR_WD-1:0]  sm_rd_addr; // read system memory addr
 	wire	[SM_ADDR_WD	-1:0]	sm_wr_addr; // write system memory addr
   	//wire 	[SM_ADDR_WD-1:0] 	buffer_cnt;	// how much is in buffer	
 	wire							wr_ram_enb; 	// for the system memory ram
 	wire 	[7:0] 				wr_ram_addr;	// for the system memory ram
 	wire 	[71:0]/*[511:0]*/	wr_ram_data;	// for the system memory ram
 	wire							wr_ram_data_strb;
-	//wire				issue_sd_cmd_strb;
-	wire							issue_abort_cmd;		
 	// From data_tf_using_adma
 	wire							dtf_iss_sd_cmd_strb;
-	
-	//wire	[1:0]		gen4ClksCnt;
 	wire							rd_2nd_input_strb;
 	
 	// For host controller memory map
@@ -177,6 +253,7 @@ module sd_host_bus_driver
 	wire	[11:0]	rd_reg_index_iss;		// for issue_sd_cmd
 	wire	[11:0]	rd_reg_index_fin;		// for fin_a_cmnd
 	wire	[11:0]	rd_reg_index_data_tf;
+	wire	[11:0]	rd_reg_index_async;
 	wire				wr_reg_strb_enb_int;
 	wire				wr_reg_strb_sdc_det; 
 	wire				wr_reg_strb_sup_clk; 
@@ -185,6 +262,7 @@ module sd_host_bus_driver
 	wire				wr_reg_strb_iss;  	// for issue_sd_cmd
 	wire				wr_reg_strb_fin;  	// for fin_a_cmnd
 	wire				wr_reg_strb_data_tf;
+	wire				wr_reg_strb_async;
 	wire	[11:0]	wr_reg_index_enb_int;
 	wire	[11:0]	wr_reg_index_sdc_det;
 	wire	[11:0]	wr_reg_index_sup_clk;
@@ -193,6 +271,7 @@ module sd_host_bus_driver
 	wire	[11:0]	wr_reg_index_iss;		// for issue_sd_cmd
 	wire	[11:0]	wr_reg_index_fin;		// for fin_a_cmnd
 	wire	[11:0]	wr_reg_index_data_tf;
+	wire	[11:0]	wr_reg_index_async;
 	wire 	[31:0]	wr_reg_output_enb_int;
 	wire 	[31:0]	wr_reg_output_sdc_det;
 	wire 	[31:0]	wr_reg_output_sup_clk;
@@ -201,6 +280,7 @@ module sd_host_bus_driver
 	wire 	[31:0]	wr_reg_output_iss;	// for issue_sd_cmd
 	wire 	[31:0]	wr_reg_output_fin;	// for fin_a_cmnd
 	wire 	[31:0]	wr_reg_output_data_tf;
+	wire 	[31:0]	wr_reg_output_async;
 	wire 	[2:0]		reg_attr_enb_int;
 	wire 	[2:0]		reg_attr_sdc_det;
 	wire 	[2:0]		reg_attr_sup_clk;
@@ -220,6 +300,8 @@ module sd_host_bus_driver
 	wire				sd_clk_stop_proc;
 	// indicates that card_init_and_id.v is being used.
 	wire				card_init_proc;
+	// indicates that async_abort_transaction.v is being used.
+	wire				async_abort_trans_proc;
 	// indicates that issue_sd_cmd.v is being used.
 	wire				iss_sd_cmd_proc;
 	// indicates that fin_a_cmnd.v is being used.
@@ -227,7 +309,6 @@ module sd_host_bus_driver
 	wire				fin_a_cmd_strb; // ready to go to fin_a_cmnd module
 	// indicates that data_tf_using_adma.v is being used.
 	wire				dat_tf_adma_proc;
-	
 	// detected that card has been inserted or removed.
 	wire				card_inserted; 	
 	wire				sd_clk_enb_strb;	// sd clock is ready to be used.
@@ -237,8 +318,11 @@ module sd_host_bus_driver
 	wire	[15:0]	rca;													  
 	wire				fin_stp_clk;								
 	wire				dat_tf_mode;								
-	wire				fin_crc_calc_strb;// finished calculating crc for one packet (64 bits).					
-	wire				str_crc_strb;		// strobe to store crc in the fifo
+	wire				fin_crc_calc_strb;      // finished calculating crc for one packet (64 bits).					
+	wire				str_crc_strb;		      // strobe to store crc in the fifo
+   wire           blocks_crc_done_strb;   // finished with 16 blocks of data
+   //wire  [4:0]    descrptrCnt;            // Counts each desciptor table.
+   wire           iss_abrt_cmd;           // start the send auto cmd12 from adma2_fsm_u2 module
 	
 	//Initialize sequential logic
 	initial	
@@ -267,15 +351,19 @@ module sd_host_bus_driver
 										   				  
 		host_tst_cmd_strb_z1		   <= 1'b0;		  
 		host_tst_cmd_strb_z2		   <= 1'b0;
-		tf_mode						   <= {16{1'b0}};
+		//tf_mode						   <= {16{1'b0}};
 		command						   <= {16{1'b0}};
 		cmd_with_tf_compl_int	   <= 1'b0;
-		command_type				   <= {2{1'b0}};
+		command_type				   <= {2{1'b0}};						 
+		kind_of_resp	            <= 3'h0;
 		data_pres_select			   <= 1'b0;
 		cmd_indx_chk_enb			   <= 1'b0;
 		cmd_crc_chk_enb			   <= 1'b0;
 		resp_type_select			   <= {2{1'b0}};
-		issue_cmd_when_busy		   <= 1'b0;
+      iss_abrt_cmd_z1            <= 1'b0;
+      iss_abrt_cmd_z2            <= 1'b0;
+		issue_abort_cmd_flag       <= 1'b0;
+		issue_cmd_with_busy		   <= 1'b0;
 		tf_blk_size					   <= {12{1'b0}};
 		blk_count					   <= {16{1'b0}};
 		card_insrtd_reg			   <= 1'b0;
@@ -297,6 +385,57 @@ module sd_host_bus_driver
       fin_crc_calc_strb_reg_z1   <= 1'b0;
       fin_crc_calc_strb_reg_z2   <= 1'b0;
       stop_recv_pkt              <= 1'b0;
+      blocks_crc_done_strb_z1    <= 1'b0;
+      blocks_crc_done_strb_z2    <= 1'b0;
+      blocks_crc_done_strb_z3    <= 1'b0;  
+      des_word	                  <= {64{1'b0}};	
+      wr_descr_table_strb_z1     <= 1'b0; 
+      wr_descr_table_strb_z2     <= 1'b0;
+      wr_descr_table_strb_z3     <= 1'b0;
+      wr_descr_table_strb_z4     <= 1'b0;
+      wr_descr_table_strb_z5     <= 1'b0;
+      wr_descr_table_strb_z6     <= 1'b0;
+      wr_descr_table_strb_z7     <= 1'b0;
+      wr_descr_table_strb_z8     <= 1'b0;
+      wr_descr_table_strb_z9     <= 1'b0;
+      wr_descr_table_strb_z10    <= 1'b0;
+      wr_descr_table_strb_z11    <= 1'b0;
+      wr_descr_table_strb_z12    <= 1'b0;
+      wr_descr_table_strb_z13    <= 1'b0;
+      wr_descr_table_strb_z14    <= 1'b0;
+      wr_descr_table_strb_z15    <= 1'b0;
+      wr_descr_table_strb_z16    <= 1'b0;
+      wr_descr_table_strb_z17    <= 1'b0;
+      wr_descr_table_strb_z18    <= 1'b0;
+      wr_descr_table_strb_z19    <= 1'b0;
+      wr_descr_table_strb_z20    <= 1'b0;
+      wr_descr_table_strb_z21    <= 1'b0;
+      wr_descr_table_strb_z22    <= 1'b0;
+      wr_descr_table_strb_z23    <= 1'b0;
+      wr_descr_table_strb_z24    <= 1'b0;
+      wr_descr_table_strb_z25    <= 1'b0;
+      wr_descr_table_strb_z26    <= 1'b0;
+      wr_descr_table_strb_z27    <= 1'b0;
+      wr_descr_table_strb_z28    <= 1'b0;
+      wr_descr_table_strb_z29    <= 1'b0;
+      wr_descr_table_strb_z30    <= 1'b0;
+      wr_descr_table_strb_z31    <= 1'b0;
+      wr_descr_table_strb_z32    <= 1'b0;
+      wr_descr_table_strb_z33    <= 1'b0;
+      wr_descr_table_strb_z34    <= 1'b0;
+      wr_descr_table_strb_z35    <= 1'b0;
+      wr_descr_table_strb_z36    <= 1'b0;
+      wr_descr_table_strb_z37    <= 1'b0;
+      wr_descr_table_strb_z38    <= 1'b0;
+      wr_descr_table_strb_z39    <= 1'b0;
+      wr_descr_table_strb_z40    <= 1'b0;
+      wr_descr_table_strb_z41    <= 1'b0;
+      wr_descr_table_strb_z42    <= 1'b0;
+      wr_descr_table_strb_z43    <= 1'b0;
+      wr_descr_table_strb_z44    <= 1'b0;
+      wr_descr_table_strb_z45    <= 1'b0;
+      wr_descr_table_strb_z46    <= 1'b0;
+      wr_descr_table_strb_z47    <= 1'b0;      
 	end
 	
 	// Assign registers to outputs.
@@ -305,7 +444,7 @@ module sd_host_bus_driver
    assign wr_reg_output   = wr_reg_output_reg;
    assign reg_attr        = reg_attr_reg;
 	assign rd_reg_index	  = rd_reg_indx;
-	assign fifo_rdy_strb	  = str_crc_strb_z3; 
+	assign fifo_rdy_strb	  = blocks_crc_done_strb_z3; 
 	                               
 	// Set up delays
 	always@(posedge clk)
@@ -325,6 +464,61 @@ module sd_host_bus_driver
          fin_crc_calc_strb_reg_z1   <= 1'b0;
          fin_crc_calc_strb_reg_z2   <= 1'b0;
 			calc_crc_z1					   <= 1'b0;
+         iss_abrt_cmd_z1            <= 1'b0;
+         iss_abrt_cmd_z2            <= 1'b0;
+			blocks_crc_done_strb_z1		<= 1'b0;
+			blocks_crc_done_strb_z2		<= 1'b0;
+			blocks_crc_done_strb_z3		<= 1'b0;
+         wr_descr_table_strb_z1     <= 1'b0;
+         wr_descr_table_strb_z2     <= 1'b0;
+         wr_descr_table_strb_z3     <= 1'b0;
+         wr_descr_table_strb_z4     <= 1'b0;
+         wr_descr_table_strb_z5     <= 1'b0;
+         wr_descr_table_strb_z6     <= 1'b0;
+         wr_descr_table_strb_z7     <= 1'b0;
+         wr_descr_table_strb_z8     <= 1'b0;
+         wr_descr_table_strb_z9     <= 1'b0;
+         wr_descr_table_strb_z10    <= 1'b0;
+         wr_descr_table_strb_z11    <= 1'b0;
+         wr_descr_table_strb_z12    <= 1'b0;
+         wr_descr_table_strb_z13    <= 1'b0;
+         wr_descr_table_strb_z14    <= 1'b0;
+         wr_descr_table_strb_z15    <= 1'b0;
+         wr_descr_table_strb_z16    <= 1'b0;
+         wr_descr_table_strb_z17    <= 1'b0;
+         wr_descr_table_strb_z18    <= 1'b0;
+         wr_descr_table_strb_z19    <= 1'b0;
+         wr_descr_table_strb_z20    <= 1'b0;
+         wr_descr_table_strb_z21    <= 1'b0;
+         wr_descr_table_strb_z22    <= 1'b0;
+         wr_descr_table_strb_z23    <= 1'b0;
+         wr_descr_table_strb_z24    <= 1'b0;
+         wr_descr_table_strb_z25    <= 1'b0;
+         wr_descr_table_strb_z26    <= 1'b0;
+         wr_descr_table_strb_z27    <= 1'b0;
+         wr_descr_table_strb_z28    <= 1'b0;
+         wr_descr_table_strb_z29    <= 1'b0;
+         wr_descr_table_strb_z30    <= 1'b0;
+         wr_descr_table_strb_z31    <= 1'b0;
+         wr_descr_table_strb_z32    <= 1'b0;
+         wr_descr_table_strb_z33    <= 1'b0;
+         wr_descr_table_strb_z34    <= 1'b0;
+         wr_descr_table_strb_z35    <= 1'b0;
+         wr_descr_table_strb_z36    <= 1'b0;
+         wr_descr_table_strb_z37    <= 1'b0;
+         wr_descr_table_strb_z38    <= 1'b0;
+         wr_descr_table_strb_z39    <= 1'b0;
+         wr_descr_table_strb_z40    <= 1'b0;
+         wr_descr_table_strb_z41    <= 1'b0;
+         wr_descr_table_strb_z42    <= 1'b0;
+         wr_descr_table_strb_z43    <= 1'b0;
+         wr_descr_table_strb_z44    <= 1'b0;
+         wr_descr_table_strb_z45    <= 1'b0;
+         wr_descr_table_strb_z46    <= 1'b0;
+         wr_descr_table_strb_z47    <= 1'b0;
+         snd_cmd13_strb_z1          <= 1'b0;
+         snd_cmd13_strb_z2          <= 1'b0;
+         snd_cmd13_strb_z3          <= 1'b0;
 		end
 		else begin
 			card_insrtd_reg		      <= card_inserted;	
@@ -332,7 +526,7 @@ module sd_host_bus_driver
 			host_tst_cmd_strb_z1			<= host_tst_cmd_strb;	  
 			host_tst_cmd_strb_z2			<= host_tst_cmd_strb_z1;	  
 			strt_snd_data_strb_z1		<= strt_snd_data_strb;	  
-			nxt_dat_strb_z1			   <= nxt_dat_strb;		  
+			nxt_dat_strb_z1			   <= new_dat_strb;		  
 			wr_b_strb_z1				   <= wr_b_strb;			  
 			wr_b_strb_z2					<= wr_b_strb_z1;													 
 			str_crc_strb_z1				<= str_crc_strb;													 
@@ -341,6 +535,61 @@ module sd_host_bus_driver
          fin_crc_calc_strb_reg_z1   <= fin_crc_calc_strb_reg;
          fin_crc_calc_strb_reg_z2   <= fin_crc_calc_strb_reg_z1;
 			calc_crc_z1					   <= calc_crc;
+         iss_abrt_cmd_z1            <= iss_abrt_cmd;
+         iss_abrt_cmd_z2            <= iss_abrt_cmd_z1;
+			blocks_crc_done_strb_z1		<= blocks_crc_done_strb;
+			blocks_crc_done_strb_z2		<= blocks_crc_done_strb_z1;
+			blocks_crc_done_strb_z3		<= blocks_crc_done_strb_z2;
+         wr_descr_table_strb_z1     <= wr_descr_table_strb;
+         wr_descr_table_strb_z2     <= wr_descr_table_strb_z1;
+         wr_descr_table_strb_z3     <= wr_descr_table_strb_z2;
+         wr_descr_table_strb_z4     <= wr_descr_table_strb_z3;
+         wr_descr_table_strb_z5     <= wr_descr_table_strb_z4 ;
+         wr_descr_table_strb_z6     <= wr_descr_table_strb_z5 ;
+         wr_descr_table_strb_z7     <= wr_descr_table_strb_z6 ;
+         wr_descr_table_strb_z8     <= wr_descr_table_strb_z7 ;
+         wr_descr_table_strb_z9     <= wr_descr_table_strb_z8 ;
+         wr_descr_table_strb_z10    <= wr_descr_table_strb_z9 ;
+         wr_descr_table_strb_z11    <= wr_descr_table_strb_z10;
+         wr_descr_table_strb_z12    <= wr_descr_table_strb_z11;
+         wr_descr_table_strb_z13    <= wr_descr_table_strb_z12;
+         wr_descr_table_strb_z14    <= wr_descr_table_strb_z13;
+         wr_descr_table_strb_z15    <= wr_descr_table_strb_z14;
+         wr_descr_table_strb_z16    <= wr_descr_table_strb_z15;
+         wr_descr_table_strb_z17    <= wr_descr_table_strb_z16;
+         wr_descr_table_strb_z18    <= wr_descr_table_strb_z17;
+         wr_descr_table_strb_z19    <= wr_descr_table_strb_z18;
+         wr_descr_table_strb_z20    <= wr_descr_table_strb_z19;
+         wr_descr_table_strb_z21    <= wr_descr_table_strb_z20;
+         wr_descr_table_strb_z22    <= wr_descr_table_strb_z21;
+         wr_descr_table_strb_z23    <= wr_descr_table_strb_z22;
+         wr_descr_table_strb_z24    <= wr_descr_table_strb_z23;
+         wr_descr_table_strb_z25    <= wr_descr_table_strb_z24;
+         wr_descr_table_strb_z26    <= wr_descr_table_strb_z25;
+         wr_descr_table_strb_z27    <= wr_descr_table_strb_z26;
+         wr_descr_table_strb_z28    <= wr_descr_table_strb_z27;
+         wr_descr_table_strb_z29    <= wr_descr_table_strb_z28;
+         wr_descr_table_strb_z30    <= wr_descr_table_strb_z29;
+         wr_descr_table_strb_z31    <= wr_descr_table_strb_z30;
+         wr_descr_table_strb_z32    <= wr_descr_table_strb_z31;
+         wr_descr_table_strb_z33    <= wr_descr_table_strb_z32;
+         wr_descr_table_strb_z34    <= wr_descr_table_strb_z33;
+         wr_descr_table_strb_z35    <= wr_descr_table_strb_z34;
+         wr_descr_table_strb_z36    <= wr_descr_table_strb_z35;
+         wr_descr_table_strb_z37    <= wr_descr_table_strb_z36;
+         wr_descr_table_strb_z38    <= wr_descr_table_strb_z37;
+         wr_descr_table_strb_z39    <= wr_descr_table_strb_z38;
+         wr_descr_table_strb_z40    <= wr_descr_table_strb_z39;
+         wr_descr_table_strb_z41    <= wr_descr_table_strb_z40;
+         wr_descr_table_strb_z42    <= wr_descr_table_strb_z41;
+         wr_descr_table_strb_z43    <= wr_descr_table_strb_z42;
+         wr_descr_table_strb_z44    <= wr_descr_table_strb_z43;
+         wr_descr_table_strb_z45    <= wr_descr_table_strb_z44;
+         wr_descr_table_strb_z46    <= wr_descr_table_strb_z45;
+         wr_descr_table_strb_z47    <= wr_descr_table_strb_z46;
+         snd_cmd13_strb_z1          <= snd_cmd13_strb;
+         snd_cmd13_strb_z2          <= snd_cmd13_strb_z1;
+         snd_cmd13_strb_z3          <= snd_cmd13_strb_z2;
 		end	
 	end	
 	
@@ -389,6 +638,8 @@ module sd_host_bus_driver
 			rd_reg_indx	<= rd_reg_index_fin;
 		else if (dat_tf_adma_proc)
 			rd_reg_indx	<= rd_reg_index_data_tf;
+		else if (async_abort_trans_proc)
+			rd_reg_indx	<= rd_reg_index_async;
 		else 
 			rd_reg_indx	<= rd_reg_index_int;	// default for internals
 	end				 						  				 
@@ -416,6 +667,8 @@ module sd_host_bus_driver
 			wr_reg_strb_reg	<= wr_reg_strb_fin;
 		else if (dat_tf_adma_proc)
 			wr_reg_strb_reg	<= wr_reg_strb_data_tf;
+		else if (async_abort_trans_proc)
+			wr_reg_strb_reg	<= wr_reg_strb_async;
 		else
 			wr_reg_strb_reg	<= wr_reg_strb_reg;
 	end
@@ -443,6 +696,8 @@ module sd_host_bus_driver
 			wr_reg_index_reg	<= wr_reg_index_fin;	
 		else if (dat_tf_adma_proc) 
 			wr_reg_index_reg	<= wr_reg_index_data_tf;
+		else if (async_abort_trans_proc) 
+			wr_reg_index_reg	<= wr_reg_index_async;
 		else 
 			wr_reg_index_reg	<= wr_reg_index_reg;
 	end
@@ -469,7 +724,9 @@ module sd_host_bus_driver
 		else if (fin_a_cmd_proc)
 			wr_reg_output_reg	<= wr_reg_output_fin;
 		else if (dat_tf_adma_proc) 
-			wr_reg_output_reg	<= wr_reg_output_data_tf; 
+			wr_reg_output_reg	<= wr_reg_output_data_tf;
+		else if (async_abort_trans_proc) 
+			wr_reg_output_reg	<= wr_reg_output_async; 
 		else
 			wr_reg_output_reg	<= wr_reg_output_reg;
 	end
@@ -506,6 +763,9 @@ module sd_host_bus_driver
 	// when we will sucessfully turned off the
 	// sd clock.  This is so we can switch to
 	// a different clock rate.
+   // Use this scheme to create a strobe from
+   // an edge system instead of using the edge
+   // change as a strobe.
 	always@(posedge clk)
 	begin
 		if (reset)
@@ -710,13 +970,16 @@ module sd_host_bus_driver
 		.card_init_proc(card_init_proc)
 		);							
 
-	// Pull out cmd_index from data.
+	// Latch command index according to strobe.
+   // ie command 0x0007, change to transfer state.
 	always @(posedge clk)
 		begin
 			if(reset)					 			  
 				cmd_index	<= {6{1'b0}};
-			else								 					 
+         else if (host_tst_cmd_strb)				 
 				cmd_index	<= data[13:8];
+         else if (snd_cmd13_strb)				 
+				cmd_index	<= 6'h0D;
 		end
 		
 	// Pull out command_type from data.
@@ -771,20 +1034,20 @@ module sd_host_bus_driver
 		begin
 			if (reset)					 			 	  				   							 
 				argument	<= {32{1'b0}};					
-			else if (cmd_index == 8'h07)  // sel_desel_card										 
+			else if (cmd_index == 6'h07)                       // sel_desel_card										 
 				argument	<= {rca,{16{1'b0}}};
-			else if (cmd_index == 8'h08)  // send_if_cond										 
+			else if (cmd_index == 6'h08)                       // send_if_cond										 
 				argument	<= {{20{1'b0}},4'h1,8'hAA};		
-			else if (cmd_index == 8'h0D)  // send_status  										 
+			else if (cmd_index == 6'h0D)                       // send_status  										 
 				argument	<= {rca,{16{1'b0}}};
-			else if (cmd_index == 8'h11)  // read_single_block
+			else if (cmd_index == 6'h11)                       // read_single_block
 				// Address to be read.
 				argument	<= sdc_rd_addr;					
-			else if (cmd_index == 8'h18)	// write_block
+			else if (cmd_index == 6'h18 || cmd_index == 6'h19)	// write_block or write_multiple_blocks
 				// Address to write.
 				argument	<= sdc_wr_addr;
 			// This is to start the initialization with command acmd41.
-			else if (cmd_index == 8'h29 && (data[31:16] != 0))  										 
+			else if (cmd_index == 6'h29 && (data[31:16] != 0))  										 
 				argument	<= {1'b0,1'b1,{6{1'b0}},data[31:16],{8{1'b0}}};
 			else  										 
 				argument	<= {32{1'b0}};
@@ -797,23 +1060,63 @@ module sd_host_bus_driver
 	always @(cmd_index)
 		begin
 			case(cmd_index)						
-				8'h02: begin								 							 
+				6'h02: begin								 							 
 							kind_of_resp	= 3'h3;//3'h2;
 				end	
-				8'h03: begin								 							 
+				6'h03: begin								 							 
 							kind_of_resp	= 3'h7;//3'h6;
 				end													
-				8'h07: begin								 							 
-							kind_of_resp	= 3'h1;
+				6'h07: begin								 							 
+							kind_of_resp	= 3'h0;
 				end														  
-				8'h08: begin								 							 
+				6'h08: begin								 							 
 							kind_of_resp	= 3'h0;//3'h7;
+				end									  
+				6'h0C: begin								 							 
+							kind_of_resp	= 3'h1;
 				end							
 				default: begin							  				   							 
 							kind_of_resp	= 3'h0;
 				end
 			endcase
 		end
+   
+   // Set up a flag for cmd12
+	always@(posedge clk)
+	begin
+		if (reset)
+			issue_cmd_with_busy <= 1'b0;
+		else if (iss_abrt_cmd) 
+			issue_cmd_with_busy <= 1'b1;
+		else if (fin_a_cmd_strb) 
+			issue_cmd_with_busy <= 1'b0;
+	end
+   
+   // Set up a flag for cmd12
+	always@(posedge clk)
+	begin
+		if (reset)
+			issue_abort_cmd_flag <= 1'b0;
+		else if (iss_abrt_cmd) 
+			issue_abort_cmd_flag <= 1'b1;
+		else if (fin_a_cmd_strb) 
+			issue_abort_cmd_flag <= 1'b0;
+	end
+   
+   async_abort_transaction async_abort_trans(
+      .clock(clk),
+      .reset(reset),
+      .enb_abort_trans(snd_auto_cmd12_strb),    // input 
+      .fin_cmnd_strb(fin_cmnd_strb),            // input finished with command
+      .iss_abrt_cmd(iss_abrt_cmd),              // output - starts the iss_sd_cmd module for cmd 12
+	   // For use with sd_host_controller. 
+	   .rd_reg_index(rd_reg_index_async), 
+	   .rd_reg_input(rd_reg_input), 
+	   .wr_reg_strb(wr_reg_strb_async), 
+	   .wr_reg_index(wr_reg_index_async), 
+	   .wr_reg_output(wr_reg_output_async),
+      .async_abort_trans_proc(async_abort_trans_proc)
+   );
 	
 	// The two modules below take care of all the communication
 	// with the host controller.  The host controller than
@@ -824,16 +1127,17 @@ module sd_host_bus_driver
 		.reset(reset), 			
 		// wait two clocks so we have time to parse out the
 		// necessary information from data input from the host.
-		.issue_sd_cmd_strb(host_tst_cmd_strb_z2 || dtf_iss_sd_cmd_strb), 
+      // host_tst_cmd_strb_z2 is from PUC command 0x0011.
+		.issue_sd_cmd_strb(host_tst_cmd_strb_z2 || iss_abrt_cmd_z2 || snd_cmd13_strb_z3),
 		.cmd_index(cmd_index), 					// See 2.2.6 Command Reg. (00Eh)
-		.argument(argument), 
+		.argument(argument),                // input 
 		.command_type(command_type), 			// See 2.2.6 Command Reg. (00Eh) 
 		.data_pres_select(data_pres_select),// See 2.2.6 Command Reg. (00Eh) 
 		.cmd_indx_chk_enb(cmd_indx_chk_enb),// See 2.2.6 Command Reg. (00Eh) 
 		.cmd_crc_chk_enb(cmd_crc_chk_enb), 	// See 2.2.6 Command Reg. (00Eh)
 		.resp_type_select(resp_type_select),// See 2.2.6 Command Reg. (00Eh)
-		.issue_cmd_when_busy(issue_cmd_when_busy), 
-		.issue_abort_cmd(issue_abort_cmd),
+		.issue_cmd_with_busy(issue_cmd_with_busy),   // for cmd 12 - input
+		.issue_abort_cmd_flag(issue_abort_cmd_flag), // for cmd 12 - input
 		// For the Host Controller memory map
 		.rd_reg_index(rd_reg_index_iss), 
 		.rd_reg_input(rd_reg_input), 
@@ -843,7 +1147,7 @@ module sd_host_bus_driver
 		.wr_reg_output(wr_reg_output_iss), 
 		.reg_attr(reg_attr_iss),
 		 
-		.fin_a_cmd_strb(fin_a_cmd_strb),
+		.fin_a_cmd_strb(fin_a_cmd_strb),    // output
 		.iss_sd_cmd_proc(iss_sd_cmd_proc)
 		);
 		 
@@ -869,26 +1173,33 @@ module sd_host_bus_driver
 		//.resp_reg_data(), // from Response register (010h)
 		.err_int_stat(/*err_stat*/), 
 		.fin_a_cmd_proc(fin_a_cmd_proc),
-		.fin_cmnd_strb(/*fin_cmnd_strb*/)
+		.fin_cmnd_strb(fin_cmnd_strb)
 		);								  
 	
 	// This is for sending a command with data.
 	data_tf_using_adma data_tf_using_adma_u8 (
-		.clk(clk), 									                         //      input 
-		.reset(reset), 															 // 		input
+		.clk(clk), 									                           //    input 
+		.reset(reset), 															   // 	input
 		// puc (or other host) starts a data transfer					 			     
-		.start_data_tf_strb(start_data_tf_strb), 							 // 		input
+		.start_data_tf_strb(start_data_tf_strb), 							   // 	input
 		// strobe for each set of data from puc (or other host)		 			     
-		.data_in_strb(data_in_strb), 											 // 		input
+		.data_in_strb(data_in_strb), 											   // 	input
 		// last set of data from puc (or other host)						 			     
-		.last_set_of_data_strb(last_set_of_data_strb), 					 // 		input
+		.last_set_of_data_strb(last_set_of_data_strb), 					   //    input
 		.date(date), 	// date from puc (or other host) per strobe	    		input
-		.data(data),	// data from puc (or other host) per strobe 	 	 		input
-		.tf_blk_size(tf_blk_size), 											 //		input
-		.blk_count(16'h0001), 													 //		input
+		//.data(/*data*/),	// data from puc (or other host) per strobe 	 	input
+		.tf_blk_size(tf_blk_size), 											   //		input
+		.blk_count(16'h0001), 													   //		input
 		.argument(sdc_wr_addr),	// Data Address 							 			input
-		.tf_mode(16'h0001), 														 //      input
-		.command(16'h1800),		// right now hard code for cmd24. 	 	      input
+		.tf_mode(tf_mode[15:0]), 												   //    input
+      .des_rd_addr(des_rd_addr),                                     //    input
+      // You are actually repeating the command below again
+      // when you are writting the io register 0x0014 before you
+      // activate this module.  But this is necessary because
+      // there is no other way of getting the sdc command 
+      // correctly passed to the host controller. In this way,
+      // you can do single block or multiple blocks write.
+		//.command(wr_reg_output_man[15:0]),		   // command index[13:8] 	 	input
 																						 	      
 		// For the Host Controller memory map								 	
 		.rd_reg_index(rd_reg_index_data_tf), 								 	//    output
@@ -897,18 +1208,107 @@ module sd_host_bus_driver
 		.wr_reg_index(wr_reg_index_data_tf), 								 	//    output
 		.wr_reg_output(wr_reg_output_data_tf), 							 	//    output
 		.reg_attr(reg_attr_data_tf),											 	//    output
+      .wr_descr_table_strb(wr_descr_table_strb),                     //    output
 		 																				 	      
-		.issue_sd_cmd_strb(dtf_iss_sd_cmd_strb), 							 	//    output
-		.issue_abort_cmd(issue_abort_cmd),									 	//    output
+		.issue_sd_cmd_strb(), 							 	                  //    output
+      // abort cmd should be from host controller
+		.issue_abort_cmd(),									 	               //    output
 																						 	      
 		// To save information to System Memory RAM.						 	
 		.wr_ram_addr(wr_ram_addr), 											 	//    output
 		.wr_ram_data(wr_ram_data), 											 	//    output
 		.wr_ram_enb(wr_ram_enb), 												 	//    output      
-																						 	
+		
+      .strt_fifo_strb(strt_fifo_strb),                               //    output
+      .fifo_rdy_strb(blocks_crc_done_strb_z3),                       //    input            
 		.strt_adma_strb(strt_adma_strb),	// start the adma state machine		output
 		.dat_tf_adma_proc(dat_tf_adma_proc)									 	//		output
-		);														 
+		);											 
+	
+	//-------------------------------------------------------------------------
+	// When start_data_tf_strb strobes, create 16 descriptors in the system
+   // memory.
+	//-------------------------------------------------------------------------
+//	defparam descrptrCntr.dw 	= 5;
+//	// Change this to reflect the number of counts you want.
+//	defparam descrptrCntr.max	= 5'h10;	
+//	//-------------------------------------------------------------------------
+//	CounterSeq descrptrCntr(
+//		.clk(clk), 						      // Clock input 50 MHz 
+//		.reset(reset),	
+//		.enable(1'b1), 	
+//		.start_strb(start_data_tf_strb),	// 
+//		.cntr(descrptrCnt), 
+//		.strb() 	                        // output
+//	);			
+		
+	// Create the descriptor table.
+	always @(posedge clk)
+	begin	
+		if(reset)					 			  	
+			des_word	<= {64{1'b0}};		
+		else if (wr_descr_table_strb      || wr_descr_table_strb_z3    || 	
+               wr_descr_table_strb_z6   || wr_descr_table_strb_z9    ||    
+               wr_descr_table_strb_z12  || wr_descr_table_strb_z15   ||   
+               wr_descr_table_strb_z18  || wr_descr_table_strb_z21   ||    
+               wr_descr_table_strb_z24  || wr_descr_table_strb_z27   ||    
+               wr_descr_table_strb_z30  || wr_descr_table_strb_z33   ||    
+               wr_descr_table_strb_z36  || wr_descr_table_strb_z39   ||    
+               wr_descr_table_strb_z42)		     
+			des_word	<= 64'h0000000002000021;		
+      // last descriptor table.   
+		else if (wr_descr_table_strb_z45)  	  	
+			des_word	<= 64'h0000000002000023;   // Tran = 1, End = 1, Valid = 1.	
+		else								 					 	
+			des_word	<= des_word;	
+	end					
+      
+   // Descriptor bram.
+  	defparam BlockRAM_DPM_32_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_DES_FILE;  
+  	BlockRAM_DPM_32_x_64  BlockRAM_DPM_32_x_64_i
+  	(	
+		.clk(clk), 					                                    //	input					 					            
+      .addr_a(des_rd_addr),			                              // input       
+      .datain_a(),    								                     // input      
+      .wr_a(),            							                     // input      
+      .addr_b(des_wr_addr),    		                              // input       
+      .wr_b(wr_descr_table_strb_z2  || wr_descr_table_strb_z5    ||
+            wr_descr_table_strb_z8  || wr_descr_table_strb_z11   ||
+            wr_descr_table_strb_z14 || wr_descr_table_strb_z17   ||
+            wr_descr_table_strb_z20 || wr_descr_table_strb_z23   ||
+            wr_descr_table_strb_z26 || wr_descr_table_strb_z29   ||
+            wr_descr_table_strb_z32 || wr_descr_table_strb_z35   ||
+            wr_descr_table_strb_z38 || wr_descr_table_strb_z41   ||
+            wr_descr_table_strb_z44 || wr_descr_table_strb_z47),  //	input                            
+      .datain_b(des_word),                                        // input                           
+      .dataout_a(des_rd_data),                                    // output
+      .dataout_b()				                                    // output
+  	);   
+	
+   // Descriptor fifo controller.
+  	defparam DesFifoCntrllr.WIDTH	= 5; 
+	FifoController	DesFifoCntrllr					
+	(
+  		.clk(clk),                          // System Clock                     input	                                                                                                    	                                                                
+  		.reset(reset | start_data_tf_strb), // System Reset					 		input			                    
+  		.enable(),                          // Enable Fifo   							input							            		                     
+      // Read Strobe to empty                                                        
+  		.rd_a_strb(des_rd_strb),            //                                  input   
+      // Write Strobe to fill				                                       input
+  		.wr_b_strb( wr_descr_table_strb      || wr_descr_table_strb_z3    || 
+                  wr_descr_table_strb_z6   || wr_descr_table_strb_z9    || 
+                  wr_descr_table_strb_z12  || wr_descr_table_strb_z15   ||
+                  wr_descr_table_strb_z18  || wr_descr_table_strb_z21   || 
+                  wr_descr_table_strb_z24  || wr_descr_table_strb_z27   || 
+                  wr_descr_table_strb_z30  || wr_descr_table_strb_z33   || 
+                  wr_descr_table_strb_z36  || wr_descr_table_strb_z39   || 
+                  wr_descr_table_strb_z42  || wr_descr_table_strb_z45),	                                  							 
+  		.addr_a(des_rd_addr),   			   // output address, read addr		   output    							 			   
+  		.addr_b(des_wr_addr),   				// input address, write addr			output					 				
+  		.fifo_empty(),                   	// flag that fifo is empty				output				                
+  		.fifo_full(),  							// flag that fifo is full				output					 				
+ 		.fifo_half() 							   // flag that fifo is half full		output               				
+	);													 
 		
 	// Decide which data to put into the Block RAM.
 	always @(posedge clk)
@@ -917,53 +1317,70 @@ module sd_host_bus_driver
 				datain	<= {64{1'b0}};
 			else if (str_crc_strb_z1)		
 				// We include the stop bit after the crc.
-				datain	<= {pkt_crc,1'b1,{47{1'b1}}};  
-			else				  
+				datain	<= {pkt_crc,1'b1,{47{1'b1}}};
+   //      else if (descrptrCnt <= 5'h10)
+	//			datain	<= 64'h0000000002000021;   // First 15 descriptor tables. 
+   //      else if (descrptrCnt == 5'h10)
+	//			datain	<= 64'h0000000002000023;   // Last descriptor table.
+			else if (wr_b_strb)				  
 				datain	<= fifo_data;
-		end									
-	
+			//else				  
+				//datain	<= fifo_data;
+		end
+   	
 	// This is the System Memory RAM.
 	// It is for storing the data
 	// to be used in ADMA2.										  
-	// we only have one block (512 bytes) to write each time.
-	// System Memory RAM (64x64, 64 items with 64 bits each).
-   // We don't use index 0 of the system memory so we will
-   // need 65 locations to store the date, 63 packets and the
-   // CRC.
+	// System Memory RAM (1057x64, 1057 items with 64 bits each).
+   // The extra one is because our bram will start at 1 not zero.
+   // 64 words x 64 bits = 4096 bits = 512 bytes = 1 block.
+   // We will need 16 blocks to store 1024 adresses
+   // 16 more locations to store 16 crcs.
+   // 1024 + 16 +1 = 1041.   
+   // One crc for each block.
 	// Need to know when to start saving data from PUC.
 	// Do we start when we start the ADMA state machine or
 	// before that? 
 	// When the data comes over from the PUC, we store the data
 	// in the fifo and also calculate the CRC for the whole word
    // as it comes in one at a time.
-  	defparam BlockRAM_DPM_66_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
-  	BlockRAM_DPM_66_x_64  BlockRAM_DPM_66_x_64_i
+  	//defparam BlockRAM_DPM_1057_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
+  	//BlockRAM_DPM_1057_x_64  BlockRAM_DPM_1057_x_64_i
+  	//defparam BlockRAM_DPM_1040_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
+  	//BlockRAM_DPM_1040_x_64  BlockRAM_DPM_1040_x_64_i
+  	defparam BlockRAM_DPM_2048_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
+  	BlockRAM_DPM_2048_x_64  BlockRAM_DPM_2048_x_64_i
   	(	
-		.clk(clk), 										//						input 
-      .addr_a(sm_rd_addr),							// for read       input 
-      .datain_a(),    								//                input 
-      .wr_a(),            							//                input 
-      .addr_b(sm_wr_addr),    					// for writing    input 
-      .wr_b(wr_b_strb_z2 || str_crc_strb_z2),//	               input 
-      .datain_b(datain), 							//                input 
-      .dataout_a(sm_rd_data),						//                output
-      .dataout_b()									//                output
+		.clk(clk), 										                     //	input 					            
+      .addr_a(sm_rd_addr),			                                 // input                            
+      .datain_a(),    								                     // input                           
+      .wr_a(),            							                     // input                           
+      .addr_b(sm_wr_addr),    		                              // input           
+      // Only strobe when we are still updating the block ram.
+      // After we have 16 blocks, stop.
+      .wr_b(!stop_recv_pkt && (wr_b_strb_z2 || str_crc_strb_z2)), //	input                            
+      .datain_b(datain), 							                     // input                            
+      .dataout_a(sm_rd_data),						                     // output                           
+      .dataout_b()									                     // output                           
   	);   
 	
   	defparam FifoCntrllr.WIDTH	= SM_ADDR_WD; 
 	FifoController	FifoCntrllr					
 	(
-  		.clk(clk),     // System Clock	                                             input 	                                                                
-  		.reset(reset || strt_adma_strb), // System Reset										input 
-  		.enable(),     // Enable Fifo   																input 							 
-  		.rd_a_strb((strt_snd_data_strb && !strt_snd_data_strb_z1)||(nxt_dat_strb && !nxt_dat_strb_z1)),// Read Strobe to empty	         input                       
-  		.wr_b_strb(wr_b_strb || str_crc_strb_z1),		// Write Strobe to fill				input 							 
-  		.addr_a(sm_rd_addr),   								// output address, read addr		output							 
-  		.addr_b(sm_wr_addr),   								// input address, write addr		output							 
-  		.fifo_empty(), // flag that fifo is empty													output							 
-  		.fifo_full(),  // flag that fifo is full													output							 
- 		.fifo_half() 	// flag that fifo is half full											output	
-	);	 							 
+  		.clk(clk),                                   // System Clock	                                    input                               	                                                                
+  		.reset(reset || start_data_tf_strb),         // System Reset										         input
+  		.enable(),                                   // Enable Fifo   													input			                     
+      // Read Strobe to empty
+      // new_dat_strb is from the sdc_clk (slower), therefore, we us a rising edge
+  		.rd_a_strb((strt_snd_data_strb && !strt_snd_data_strb_z1)||(new_dat_strb && !nxt_dat_strb_z1)),//  input  
+      // Only write when stop_recv_pkt is false
+  		.wr_b_strb(!stop_recv_pkt && (wr_b_strb || str_crc_strb_z1)),		   // Write Strobe to fill		   input 							 
+  		.addr_a(sm_rd_addr),   								// output address, read addr									output 
+  		.addr_b(sm_wr_addr),   								// output address, write addr									output 
+  		.fifo_empty(),                               // flag that fifo is empty									   output 
+  		.fifo_full(),  										// flag that fifo is full										output 
+ 		.fifo_half() 											// flag that fifo is half full		                  output
+	);	 		 
 
 	// Capture and Shift (left) the data, MSBit first.
 	always@(posedge clk)
@@ -985,19 +1402,22 @@ module sd_host_bus_driver
 	end			
 		
 	// Reset the crc calculator when we have finished
-	// sending the data.	 Actually, we can turn it off
-	// earlier, check the timing diagram.
+	// one block of data.  One block of data is 64 puc
+   // data words.  We need a separate crc for each block.
 	always @(posedge clk)
 		begin
 			if(reset)					 			  
 				rst_crc_calc	<= 1'b0;	
-			else if (sm_rd_addr == 	8'h3E)							 					 
+			else if (str_crc_strb_z2)							 					 
 				rst_crc_calc	<= 1'b1;
-			else								 					 
+         // turn off reset when we start to get data from puc.
+			else if (wr_b_strb)  						 					 
 				rst_crc_calc	<= 1'b0;
+			else								 					 
+				rst_crc_calc	<= rst_crc_calc;
 		end			
 	
-	// Calculates the crc16 of one block of data.
+   // Calculates the crc16 of one block of data.
 	// One block is 512 bytes.  So we need to calculate 
 	// the CRC for 64 packets of 64 bits.
 	sd_crc_16 calcCRC0(
@@ -1027,14 +1447,18 @@ module sd_host_bus_driver
 		.reset(reset),	
 		.enable(1'b1), 	
 		.start_strb(wr_b_strb_z2),	// strobe to start calculation.  May want to wait one clock.
-		.cntr(/*crc_calc_cnts*/), 
-		.strb(fin_crc_calc_strb) 	// output
+		.cntr(), 
+		.strb(fin_crc_calc_strb) 	// output, for each word of 64 bits
 	);										
         
   	//---------------------------------------------------------------
 	// Keep track of how many puc data words have came in.
 	// When the time is up, we store the crc in the fifo.
-  	//
+  	// We need to store 64 data words for each crc.
+   // When we finish calculating the crc for one packet of data
+   // we strobe here once.  When we get to 64, we are done with
+   // one block of data.  Then we are ready to store the crc
+   // after that one block of data.
   	defparam crcSetsCntr_u12.dw 	= 7;
   	defparam crcSetsCntr_u12.max 	= 7'h40;  
   	//---------------------------------------------------------------
@@ -1042,9 +1466,24 @@ module sd_host_bus_driver
   	(
     	.clk(clk),
     	.reset(reset),
-    	.enable(fin_crc_calc_strb),
+    	.enable(fin_crc_calc_strb),   // counts each time this strobes
     	.cntr(),
-    	.strb(str_crc_strb)
+    	.strb(str_crc_strb)           // finished 64 packets of 64 bits each
+  	);										
+        
+  	//---------------------------------------------------------------
+	// We need to store 16 crcs for 16 blocks of data.
+   // Each block of data is 64 words (registers) of data.
+  	defparam blocksCRCCntr.dw 	= 6;
+  	defparam blocksCRCCntr.max = 6'h10;  
+  	//---------------------------------------------------------------
+  	Counter blocksCRCCntr
+  	(
+    	.clk(clk),
+    	.reset(reset),
+    	.enable(str_crc_strb),        // for each block
+    	.cntr(),
+    	.strb(blocks_crc_done_strb)   // finished all 16 blocks
   	);																									  
 	
 	// A register version of fin_crc_calc_strb.
@@ -1064,13 +1503,14 @@ module sd_host_bus_driver
 	begin
 		if (reset) 
 			stop_recv_pkt <= 1'b0;
-		else if (str_crc_strb) 
+		else if (blocks_crc_done_strb) 
 			stop_recv_pkt <= 1'b1;			  
-		else if (strt_snd_data_strb)
+		else if (/*strt_snd_data_strb*/strt_fifo_strb)
 			stop_recv_pkt <= 1'b0;
 	end																								  
 	
 	// Ready for next packet from PUC.
+   // Each packet is 64 bits of puc data.
 	always@(posedge clk)
 	begin
 		if (reset) 
@@ -1107,12 +1547,12 @@ module sd_host_bus_driver
 	defparam gen4ClksCntr_u10.max	= 2'h3;	
 	//-------------------------------------------------------------------------
 	CounterSeq gen4ClksCntr_u10(
-		.clk(clk), 		// Clock input 50 MHz 
-		.reset(reset),	// GSR
-		.enable(1'b1), 	
-		.start_strb(/*rd_input_strb*/1'b0), // strobe when read 1st input.
-		.cntr(/*gen4ClksCnt*/), 
-		.strb(rd_2nd_input_strb) // output
+		.clk(clk), 		            // Clock input 50 MHz                     
+		.reset(reset),	            // GSR         
+		.enable(1'b1), 	         
+		.start_strb(1'b0),         // strobe when read 1st input.         
+		.cntr(), 
+		.strb(rd_2nd_input_strb)   // output
 	);
 	
 	// Some steps we need to do when the card is inserted. //////
@@ -1120,10 +1560,6 @@ module sd_host_bus_driver
    parameter STE_SUP_CLK 	= 3'b001;
    parameter STE_INIT_CRD 	= 3'b010;
    parameter STE_STP_CLK 	= 3'b011;
-//   parameter <state5> = 3'b100;
-//   parameter <state6> = 3'b101;
-//   parameter <state7> = 3'b110;
-//   parameter <state8> = 3'b111;
 	
 	reg [2:0] 	pres_state = STE_STRT;
 	reg [2:0]	next_state;

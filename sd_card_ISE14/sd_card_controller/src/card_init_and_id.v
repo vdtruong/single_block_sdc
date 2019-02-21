@@ -54,7 +54,7 @@ module card_init_and_id(
 	reg	[1:0]		command_type;
 	reg				data_pres_select;
 	reg	[1:0]		resp_type_select;
-	reg				issue_cmd_when_busy;
+	reg				issue_cmd_with_busy;
 	reg				issue_abort_cmd;
 	reg				r7_crc7_good;
 	reg				f8_flg;
@@ -127,7 +127,7 @@ module card_init_and_id(
 		command_type				<= {2{1'b0}};
 		data_pres_select			<= 1'b0;
 		resp_type_select			<= {2{1'b0}};
-		issue_cmd_when_busy		<= 1'b0;
+		issue_cmd_with_busy		<= 1'b0;
 		issue_abort_cmd			<= 1'b0;
 		r7_crc7_good				<= 1'b0;
 		f8_flg						<= 1'b0;
@@ -289,7 +289,7 @@ module card_init_and_id(
 			command_type					<= {2{1'b0}};
 			data_pres_select				<= 1'b0;
 			resp_type_select				<= {2{1'b0}};
-			issue_cmd_when_busy			<= 1'b0;
+			issue_cmd_with_busy			<= 1'b0;
 			issue_abort_cmd				<= 1'b0;
 			try_cnt							<= {4{1'b0}};
 			try_cmd8_again					<= 1'b0;
@@ -320,7 +320,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -344,7 +344,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= try_cmd8_again;
@@ -373,7 +373,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= try_cmd8_again;
@@ -397,7 +397,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= try_cmd8_again;
@@ -426,7 +426,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= try_cmd8_again;
@@ -464,7 +464,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					// Only try 1 time.
@@ -494,7 +494,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					// Only try 1 time.
@@ -521,7 +521,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -550,7 +550,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -574,7 +574,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt + 1'b1;
 					try_cmd8_again			<= 1'b0;
@@ -621,7 +621,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -647,7 +647,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -676,7 +676,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -700,7 +700,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -736,7 +736,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -765,7 +765,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -796,7 +796,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -820,7 +820,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -851,7 +851,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -875,7 +875,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -915,7 +915,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -940,7 +940,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -974,7 +974,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -999,7 +999,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1024,7 +1024,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1052,7 +1052,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1077,7 +1077,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= 1'b0;
 					try_cmd8_again			<= 1'b0;
@@ -1106,7 +1106,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= 1'b0;
 					try_cmd8_again			<= 1'b0;
@@ -1132,7 +1132,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1156,7 +1156,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= 1'b0;
 					try_cmd8_again			<= 1'b0;
@@ -1185,7 +1185,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= 2'b10;
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= 1'b0;
 					try_cmd8_again			<= 1'b0;
@@ -1209,7 +1209,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1240,7 +1240,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1271,7 +1271,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= try_cnt;
 					try_cmd8_again			<= 1'b0;
@@ -1296,7 +1296,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1320,7 +1320,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1344,7 +1344,7 @@ module card_init_and_id(
 					command_type			<= {2{1'b0}};
 					data_pres_select		<= 1'b0;
 					resp_type_select		<= {2{1'b0}};
-					issue_cmd_when_busy	<= 1'b0;
+					issue_cmd_with_busy	<= 1'b0;
 					issue_abort_cmd		<= 1'b0;
 					try_cnt					<= {4{1'b0}};
 					try_cmd8_again			<= 1'b0;
@@ -1399,8 +1399,8 @@ module card_init_and_id(
 		.cmd_indx_chk_enb(1'b0/*cmd_indx_chk_enb*/),	// See 2.2.6 Command Reg. (00Eh) 
 		.cmd_crc_chk_enb(1'b0/*cmd_crc_chk_enb*/), 	// See 2.2.6 Command Reg. (00Eh)
 		.resp_type_select(resp_type_select), 	// See 2.2.6 Command Reg. (00Eh)
-		.issue_cmd_when_busy(issue_cmd_when_busy), 
-		.issue_abort_cmd(issue_abort_cmd),
+		.issue_cmd_with_busy(issue_cmd_with_busy), 
+		.issue_abort_cmd_flag(issue_abort_cmd),
 		// For the Host Controller memory map
 		.rd_reg_index(rd_reg_index_iss), 
 		.rd_reg_input(rd_reg_input), 

@@ -22,17 +22,19 @@
 module issue_sd_cmd(
 	 input            clk,
 	 input				reset,
-	 input				issue_sd_cmd_strb, // strobe to get out of start state
+	 input				issue_sd_cmd_strb,// strobe to get out of start state
     //input 				cmd_with_tf_compl_int,
+    // The following gets information from puc command 0x0011.
 	 input	[5:0]		cmd_index,
 	 input	[31:0] 	argument,
-	 input	[1:0]		command_type,
-	 input				data_pres_select,
-	 input				cmd_indx_chk_enb,
-	 input				cmd_crc_chk_enb,
-	 input	[1:0]		resp_type_select,
-	 input				issue_cmd_when_busy,
-	 input				issue_abort_cmd,
+	 input	[1:0]		command_type,     // may want to check for cmd12
+	 input				data_pres_select, // may want to check for cmd12
+	 input				cmd_indx_chk_enb, // may want to check for cmd12
+	 input				cmd_crc_chk_enb,  // may want to check for cmd12
+	 input	[1:0]		resp_type_select, // may want to check for cmd12
+    // End for command 0x0011.
+	 input				issue_cmd_with_busy,
+	 input				issue_abort_cmd_flag,
 	 // For use with sd_host_controller.
 	 output	[11:0]	rd_reg_index,
 	 input 	[127:0]	rd_reg_input,
@@ -40,8 +42,8 @@ module issue_sd_cmd(
 	 output	[11:0]	wr_reg_index,
 	 output 	[31:0]	wr_reg_output,
 	 output 	[2:0]		reg_attr,
-	 output				fin_a_cmd_strb, // start the finalize a command seq.
-	 output				iss_sd_cmd_proc // indicates that we are in this module still
+	 output				fin_a_cmd_strb,   // start the finalize a command seq.
+	 output				iss_sd_cmd_proc   // indicates that we are in this module still
     );
 	
 	// Registers
@@ -59,9 +61,12 @@ module issue_sd_cmd(
 	reg 			iss_sd_cmd_proc_reg; 
 	// need 3 clocks to get back reading from host controller
 	reg			rd_reg_strb; 
+   //reg         issue_abort_cmd_flag;
 	
 	// Wire
 	wire			read_clks_tout;
+   wire [5:0]  cmd_indx;      // command index to send to sdc
+   wire [31:0] arg;           // argument for cmd8
 	
 	// Initialize sequential logic
 	initial			
@@ -79,6 +84,7 @@ module issue_sd_cmd(
 		fin_a_cmd_strb_reg		<= 1'b0;
 		iss_sd_cmd_proc_reg		<= 1'b0;
 		rd_reg_strb					<= 1'b0;
+		//issue_abort_cmd_flag		<= 1'b0;
 	end
 	
 	// Assign registers to outputs.
@@ -90,6 +96,8 @@ module issue_sd_cmd(
 	assign reg_attr				= reg_attr_reg;
 	assign fin_a_cmd_strb		= fin_a_cmd_strb_reg;
 	assign iss_sd_cmd_proc		= iss_sd_cmd_proc_reg;
+   assign cmd_indx            = (issue_abort_cmd_flag == 1'b1) ? 6'h0C : cmd_index;                     // send cmd 12 if true
+   assign arg                 = (issue_abort_cmd_flag == 1'b1) ? {{20{1'b0}},4'h1,8'hAA} : argument;    // if for cmd 12 is true 
 	
 	// Update cmd_line_free.  Present State Register (Offset 024h).
 	always@(posedge clk)
@@ -179,22 +187,22 @@ module issue_sd_cmd(
 	);
 	
 	// State machine to issue a sd command without data.
-   parameter state_start  						= 12'b000000000001;
-	parameter state_chk_inhb_cmd  			= 12'b000000000010;	  
-	parameter state_rd_wait  					= 12'b000000000100;
-   parameter state_issue_cmd_when_busy  	= 12'b000000001000;
-   parameter state_issue_abort_cmd_query	= 12'b000000010000;
-   parameter state_chk_inhb_dat				= 12'b000000100000;
-   parameter state_rd_wait2					= 12'b000001000000;
-   parameter state_set_arg1				  	= 12'b000010000000; 
-   parameter state_wr_strb_wait				= 12'b000100000000;
-   parameter state_send_cmd  					= 12'b001000000000;
-   parameter state_wt_send  					= 12'b010000000000;
-   parameter state_end 							= 12'b100000000000;
+   parameter state_start  						= 12'b0000_0000_0001;
+	parameter state_chk_inhb_cmd  			= 12'b0000_0000_0010;	  
+	parameter state_rd_wait  					= 12'b0000_0000_0100;
+   parameter state_issue_cmd_with_busy  	= 12'b0000_0000_1000;
+   parameter state_issue_abort_cmd_query	= 12'b0000_0001_0000;
+   parameter state_chk_inhb_dat				= 12'b0000_0010_0000;
+   parameter state_rd_wait2					= 12'b0000_0100_0000;
+   parameter state_set_arg1				  	= 12'b0000_1000_0000; 
+   parameter state_wr_strb_wait				= 12'b0001_0000_0000;
+   parameter state_send_cmd  					= 12'b0010_0000_0000;
+   parameter state_wt_send  					= 12'b0100_0000_0000;
+   parameter state_end 							= 12'b1000_0000_0000;
 
    (* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
 	SAFE_RECOVERY_STATE="state_start" *) 
-	reg [11:0] state = 	state_start;
+	reg [11:0] state = state_start;
 
    always@(posedge clk)
       if (reset) begin
@@ -241,7 +249,7 @@ module issue_sd_cmd(
             end 
             state_rd_wait : begin					// 12'b0000_0000_0100
                if (read_clks_tout && cmd_line_free)
-                  state 				<= state_issue_cmd_when_busy;
+                  state 				<= state_issue_cmd_with_busy;
                else if (!read_clks_tout)
                   state 				<= state_rd_wait;
                else
@@ -256,10 +264,10 @@ module issue_sd_cmd(
 					iss_sd_cmd_proc_reg	<= 1'b1;
 					rd_reg_strb				<= 1'b0;				
             end
-            state_issue_cmd_when_busy : begin	// 12'b0000_0000_1000
-               if (issue_cmd_when_busy)
+            state_issue_cmd_with_busy : begin	// 12'b0000_0000_1000
+               if (issue_cmd_with_busy)
                   state		 			<= state_issue_abort_cmd_query;
-               else if (!issue_cmd_when_busy)
+               else if (!issue_cmd_with_busy)
                   //state <= state_wait_for_clear;
 						state 				<= state_set_arg1;
                else
@@ -269,16 +277,16 @@ module issue_sd_cmd(
 					wr_reg_strb_reg		<= 1'b0;
 					wr_reg_index_reg 		<= 12'h000;
 					wr_reg_output_reg		<= {32{1'b0}};
-					reg_attr_reg			<= 3'h0; // type of bit write
+					reg_attr_reg			<= 3'h0;    // type of bit write
 					fin_a_cmd_strb_reg	<= 1'b0;
 					iss_sd_cmd_proc_reg	<= 1'b1;
 					rd_reg_strb				<= 1'b0;
             end
             state_issue_abort_cmd_query : begin	// 12'b0000_0001_0000
-               if (issue_abort_cmd)
+               if (issue_abort_cmd_flag)
                   //state <= state_issue_abort_cmd_send;
 						state 				<= state_set_arg1;
-               else if (!issue_abort_cmd)
+               else if (!issue_abort_cmd_flag)
                   state 				<= state_chk_inhb_dat;
                else
                   state 				<= state_end;
@@ -328,7 +336,7 @@ module issue_sd_cmd(
 					wr_reg_strb_reg		<= 1'b1;
 					// Update the argument field of the send command.
 					wr_reg_index_reg 		<= 12'h008;
-					wr_reg_output_reg		<= argument;
+					wr_reg_output_reg		<= arg;
 					reg_attr_reg			<= 3'h0; // type of bit write
 					fin_a_cmd_strb_reg	<= 1'b0;
 					iss_sd_cmd_proc_reg	<= 1'b1;
@@ -349,7 +357,7 @@ module issue_sd_cmd(
 					rd_reg_index_reg 		<= 12'h000;
 					wr_reg_strb_reg		<= 1'b0;							 
 					wr_reg_index_reg 		<= 12'h008;
-					wr_reg_output_reg		<= argument;
+					wr_reg_output_reg		<= arg;
 					reg_attr_reg			<= 3'h0; 
 					fin_a_cmd_strb_reg	<= 1'b0;
 					iss_sd_cmd_proc_reg	<= 1'b1;
@@ -369,7 +377,7 @@ module issue_sd_cmd(
 					// make sure you have a mechanism for waiting or 
 					// enough clocks to get the response back.
 					wr_reg_index_reg 		<= 12'h00E;
-					wr_reg_output_reg		<= {{16{1'b0}},{2{1'b0}},cmd_index,	
+					wr_reg_output_reg		<= {{16{1'b0}},{2{1'b0}},cmd_indx,	
 													command_type,data_pres_select,
 													cmd_indx_chk_enb,cmd_crc_chk_enb,{1'b0},
 													resp_type_select};
@@ -390,7 +398,7 @@ module issue_sd_cmd(
 					wr_reg_strb_reg		<= 1'b0;
 					// Keep the index and data available a bit longer.
 					wr_reg_index_reg 		<= 12'h00E;
-					wr_reg_output_reg		<= {{16{1'b0}},{2{1'b0}},cmd_index,	
+					wr_reg_output_reg		<= {{16{1'b0}},{2{1'b0}},cmd_indx,	
 													command_type,data_pres_select,
 													cmd_indx_chk_enb,cmd_crc_chk_enb,{1'b0},
 													resp_type_select};

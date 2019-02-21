@@ -1,17 +1,17 @@
 `timescale 1ns / 1ps
 ///////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 		VDT
+// Company:          Fresenius NA
+// Engineer: 		   VDT
 // 
-// Create Date:    10:36:56 10/03/2012 
+// Create Date:      10:36:56 10/03/2012 
 // Design Name: 
-// Module Name:    sd_host_controller 
+// Module Name:      sd_host_controller 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
-// Description: 	This is the SD Host Controller.  It interacts with the
-//						SD Card and the Host Bus Driver.  The Host Bus Driver
-//						interacts with the PUC.
+// Description: 	   This is the SD Host Controller.  It interacts with the
+//						   SD Card and the Host Bus Driver.  The Host Bus Driver
+//						   interacts with the PUC.
 //
 // Dependencies: 
 //
@@ -26,30 +26,40 @@ module sd_host_controller(
 	input 					card_removed_strb,
 	
 	// For communication with the map registers.
-	input 		[11:0]	rd_reg_index, 	// which reg to read
-	output reg	[127:0]	rd_reg_output,	// export reg data	
-	input						wr_reg_strb,	// strobe to write data
-	input 		[11:0]	wr_reg_index,	// which reg to write
-	input 		[31:0]	wr_reg_input,	// data to write
+	input 		[11:0]	rd_reg_index, 	      // which reg to read
+	output reg	[127:0]	rd_reg_output,	      // export reg data	
+	input						wr_reg_strb,	      // strobe to write data
+	input 		[11:0]	wr_reg_index,	      // which reg to write
+	input 		[31:0]	wr_reg_input,	      // data to write
 	input 		[2:0]		reg_attr,
-	input 		[2:0]		kind_of_resp, 	// based on command index
+	input 		[2:0]		kind_of_resp, 	      // based on command index
 																									 
    input 		[35:0] 	data,	  															 
 	
 	// For adma state machine.
-	input						strt_adma_strb,		// Start Fifo transfer to sd card.	
-	input			[15:0]	pkt_crc,					// CRC for 512 bytes from PUC.
+	input						strt_adma_strb,	   // Start Fifo transfer to sd card.	   	
+	input			[15:0]	pkt_crc,					// CRC for 512 bytes from PUC.   
+   output               des_fifo_rd_strb,    // strobe for the descriptor item   
+   input       [63:0]   des_rd_data,         // descriptor item   
+   input                fin_cmnd_strb,       // finished sending out cmd13, response is ready   input  
 	
 	// For Fifo data.									
 	// Send signal to puc to start filling up fifo.
-	output					strt_fifo_strb,
+	//output					strt_fifo_strb,
+   // This signal fetches the first data from the data bram.
    output reg           strt_snd_data_strb,  // start to send data to sd card.
-   output 					nxt_dat_strb,			// Ready for next set of data to sd card.
+   // The signal fetches the following data from the bram
+   // until we are finished with one block of data.  One block
+   // is 64 words of 64 bits each.
+   output 					new_dat_strb,			// Ready for next word of data to sd card.
 	input 		[63:0]	sm_rd_data,				// from the system memory RAM	 
 	input						fifo_rdy_strb,			// fifo is ready to be used
 	
 	output					end_bit_det_strb,		// finished sending out command
 	output					r1_crc7_good_out,
+   output               snd_auto_cmd12_strb, // send the auto cmd12 to end multiple blocks transfer
+   //output               issue_abort_cmd,     // indicate an abort command is being sent
+   output               snd_cmd13_strb,      // send cmd13 to poll for card ready    
 	
 	input						D0_in, 					// only D0 has a busy signal
 	output					D0_out,
@@ -151,6 +161,8 @@ module sd_host_controller(
 	// 2.2.5 Transfer Mode Register (Offset 00Ch)
 	reg[15:0] transfer_mode;
 	// 2.2.6 Command Register (Offset 00Eh) (pg 40)
+   // Whenever you write to this register, you will
+   // generate a send to the sdc.
 	reg[15:0] command;
 	// 2.2.7 Response Register (Offset 010h)
 	reg[127:0] response;
@@ -199,7 +211,8 @@ module sd_host_controller(
 	// 2.2.29 ADMA Error Status Register (Offset 054h)
 	reg[7:0]  adm_error_status;
 	// 2.2.30 ADMA System Address Register (Offset 058h)
-	reg[63:0] adma_system_addr;
+   // Should be 64 bits but we are only using 32 bits.
+	reg[31:0] adma_system_addr;
 	// 2.2.31 Preset Value Registers (Offset 06F-060h)
 	reg[15:0] preset_value;
 	// 2.2.32 Shared Bus Control Register (Offset 0E0h) (Optional)
@@ -217,6 +230,7 @@ module sd_host_controller(
 	reg 	[127:0]	reg_selected;
 	reg 	[63:0]	reg2_selected;
 	reg	[31:0] 	present_state_z1;						
+	reg   [15:0]   normal_int_status_z1;   // delay
 	reg				wr_reg_strb_z1;			// strobe to write data, delay
 	reg				wr_reg_strb_z2;			// strobe to write data, delay										  
 	// This will start the ADMA2 base on the card status response packet.
@@ -237,6 +251,20 @@ module sd_host_controller(
 	reg				r2_resp_enb;		// Determine if it's a R2 response.		
 	reg	[15:0]	rca;					// RCA after reception of CMD3.		
 	reg				wr_busy_z1; 		// indicates that the sd card is busy, delay
+   reg            des_fifo_rd_strb_z1; // delay
+   reg            des_fifo_rd_strb_z2; // delay
+	reg            des_fifo_rd_strb_z3; // delay
+	reg            des_fifo_rd_strb_z4; // delay
+	reg            des_fifo_rd_strb_z5; // delay
+	reg            des_fifo_rd_strb_z6; // delay
+	// Reached the last descriptor table, 
+	// attr_end_descr = 1.  We are done with all data blocks.
+	// If the Auto CMD12 is set in the transfer mode register,
+	// the host controller should send the CMD12 automatically
+	// to stop the transfer.  This is done after the last block
+	// has been sent/receive to/from the SD card.
+	reg				end_descr;
+   reg            dat_tf_done_z1;      // delay
 	
 	// Wires	  
 	wire				new_cmd_strb; 
@@ -247,28 +275,22 @@ module sd_host_controller(
 	wire 	[47:0] 	response_packet;
 	wire 	[135:0] 	r2_packet;
 	wire	[6:0]		resp2_crc7_out;
-	wire				adma_sar_inc_strb; 	// increments adma sys. addr. reg.	
+	wire				adma_sar_inc_strb; 	      // increments adma sys. addr. reg.	
+   wire           adma2_rdy_to_snd_dat_strb; // send first word of each block
 						// careful, based on sdc_clk
-	wire				end_bit_det_strb;		// end bit of write command detected
-	wire				wr_busy; 				// indicates that the sd card is busy
-	wire				new_dat_set_strb;
-	wire 	[71:0]	tf_data;						  								 	 	
-	wire				dat_tf_done;			// Finished with data transfer.
-	// Reached the last descriptor table, 
-	// attr_end_descr = 1.  We are done with all data blocks.
-	// If the Auto CMD12 is set in the transfer mode register,
-	// the host controller should send the CMD12 automatically
-	// to stop the transfer.  This is done after the last block
-	// has been sent/receive to/from the SD card.
-	wire				end_descr;
+	//wire				end_bit_det_strb;		      // end bit of write command detected
+	wire				wr_busy; 				      // indicates that the sd card is busy
+	wire				new_dat_set_strb;       
+	wire 	[71:0]	tf_data;					   	  								 	 	
+	wire				dat_tf_done;			      // Finished with data transfer.
 	wire				sd_clk_stable;
-	wire				sdc_clk; 				// internally generated sd clock.
-	wire	[15:0]	dat_crc16_out;
-	wire				fin_64sdclks_strb; 	// for Command Timeout Error	
-	wire				fin_strtchStrb40h; 	// finish the snd_cmd_strb latch
-	wire				fin_strtchStrb10h; 	// finish the snd_cmd_strb latch	
-   wire 	[4095:0] rd0_pkt;					// read packet from sd card, single line	 
-	wire				new_rd0_pkt_strb;		// rd0 pkt ready.
+	wire				sdc_clk; 				   // internally generated sd clock.
+	wire	[15:0]	dat_crc16_out;          
+	wire				fin_64sdclks_strb; 	   // for Command Timeout Error	
+	wire				fin_strtchStrb40h; 	   // finish the snd_cmd_strb latch
+	wire				fin_strtchStrb10h; 	   // finish the snd_cmd_strb latch	
+   wire 	[4095:0] rd0_pkt;						// read packet from sd card, single line 
+	wire				new_rd0_pkt_strb;		   // rd0 pkt ready.
 	
 	// Initialize sequential logic
 	// Need to put the registers in here too.
@@ -297,6 +319,14 @@ module sd_host_controller(
 		rca								<= {16{1'b0}};			  
 		dat0_crc							<= {16{1'b0}};			  
 		wr_busy_z1						<= 1'b0;
+		des_fifo_rd_strb_z1		   <= 1'b0; 
+		des_fifo_rd_strb_z2		   <= 1'b0; 
+		des_fifo_rd_strb_z3		   <= 1'b0; 
+		des_fifo_rd_strb_z4			<= 1'b0; 
+		des_fifo_rd_strb_z5			<= 1'b0; 
+		des_fifo_rd_strb_z6			<= 1'b0;
+		dat_tf_done_z1			      <= 1'b0;
+      //snd_auto_cmd12_strb 	      <= 1'b0;
 		
 		// Begin of map register initializing.
 		sdma_system_addr				<= {32{1'b0}};
@@ -316,7 +346,8 @@ module sd_host_controller(
 		clock_cntrl 					<= 16'h4001;
 		timeout_cntrl 					<= {8{1'b0}}; 
 		software_reset					<= {8{1'b0}};									 
-		normal_int_status				<= {16{1'b0}};
+		normal_int_status				<= {16{1'b0}};								 
+		normal_int_status_z1			<= {16{1'b0}}; // delay
 		error_int_status				<= {16{1'b0}};
 		// Enable interrupts, should be set up by bus host driver
 		// Maybe a separate application module can set this.
@@ -332,7 +363,7 @@ module sd_host_controller(
 		max_current_capabilities	<= {64{1'b0}}; 
 		fer_for_eis						<= {16{1'b0}}; 
 		adm_error_status				<= {8{1'b0}};   
-		adma_system_addr				<= {64{1'b0}}; 
+		adma_system_addr				<= {32{1'b0}}; 
 		preset_value					<= {16{1'b0}}; 
 		slot_int_status				<= {16{1'b0}}; 
 		host_controller_version		<= {16{1'b0}};
@@ -349,9 +380,17 @@ module sd_host_controller(
 			new_resp_2_pkt_strb_z1	<= 1'b0;	
 			end_bit_det_strb_z1		<= 1'b0;	 
 			present_state_z1			<= {32{1'b0}};	
+			normal_int_status_z1	   <= {16{1'b0}};	
 			wr_reg_strb_z1				<= 1'b0;		 	  	
 			wr_reg_strb_z2				<= 1'b0;				  
 			wr_busy_z1					<= 1'b0;
+			des_fifo_rd_strb_z1	   <= 1'b0; 
+			des_fifo_rd_strb_z2	   <= 1'b0;
+			des_fifo_rd_strb_z3	   <= 1'b0;
+			des_fifo_rd_strb_z4	   <= 1'b0;
+         des_fifo_rd_strb_z5	   <= 1'b0;
+         des_fifo_rd_strb_z6	   <= 1'b0;
+         dat_tf_done_z1			   <= 1'b0;
 		end
 		else begin										  
 			sd_clk_stab_reg_z1		<= sd_clk_stab_reg;
@@ -360,9 +399,17 @@ module sd_host_controller(
 			new_resp_2_pkt_strb_z1	<= new_resp_2_pkt_strb;	
 			end_bit_det_strb_z1		<= end_bit_det_strb;
 			present_state_z1			<= present_state;	
+			normal_int_status_z1	   <= normal_int_status;	
 			wr_reg_strb_z1				<= wr_reg_strb;	  
 			wr_reg_strb_z2				<= wr_reg_strb_z1;			  
 			wr_busy_z1					<= wr_busy;
+			des_fifo_rd_strb_z1	   <= des_fifo_rd_strb; 
+			des_fifo_rd_strb_z2	   <= des_fifo_rd_strb_z1;
+			des_fifo_rd_strb_z3	   <= des_fifo_rd_strb_z2;
+			des_fifo_rd_strb_z4	   <= des_fifo_rd_strb_z3;
+			des_fifo_rd_strb_z5	   <= des_fifo_rd_strb_z4;
+			des_fifo_rd_strb_z6	   <= des_fifo_rd_strb_z5;
+         dat_tf_done_z1			   <= dat_tf_done;
 		end
 	end																							
 	////////////////////////////////////////////////////////////////////////////
@@ -390,7 +437,7 @@ module sd_host_controller(
 			12'h030	:	reg_selected <= {{116{1'b0}}, normal_int_status};
 			12'h032	:	reg_selected <= {{116{1'b0}}, error_int_status};
 			12'h040	:	reg_selected <= {{64{1'b0}}, capabilities};
-			12'h058	:	reg_selected <= {{64{1'b0}}, adma_system_addr};
+			12'h058	:	reg_selected <= adma_system_addr;
 			// Followings are not part of host controller register map.
 			12'h0FF	:	reg_selected <= {{112{1'b0}}, dat0_crc};
 			default 	: 	reg_selected <= {128{1'b0}};
@@ -424,8 +471,15 @@ module sd_host_controller(
 		.start_strb(end_bit_det_strb && !end_bit_det_strb_z1),   	 	
 		.cntr(), 
 		.strb(fin_64sdclks_strb) 
-	);
-	
+	);   
+    
+	// Parse for end_descr.
+   always @(posedge clk) begin
+      if (reset)
+         end_descr <= 1'b0;
+      else if (des_fifo_rd_strb_z5) // wait for 5 clocks
+         end_descr <= des_rd_data[1];
+   end	
 	
 	////////////////////////////////////////////////////////////////////////////
 	// Start of the register map updating.
@@ -434,7 +488,7 @@ module sd_host_controller(
 	////////////////////////////////////////////////////////////////////////////
 	
 	// Update present_state[0].
-	// This bit is set immediately after the Command register (00Fh) is written. 
+	// This bit is set immediately after the Command register (00Eh) is written. 
 	// This bit is cleared when the command response is received.
 	// 1 Cannot issue command
 	// 0 Can issue command using only CMD line
@@ -498,7 +552,7 @@ module sd_host_controller(
 		// new_resp_pkt_strb indicates the end bit of the command response.
 		// Use falling edge because new_resp_pkt_strb is from the sdc_clock. 							  
 		else if ((!new_resp_pkt_strb && new_resp_pkt_strb_z1) ||
-					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1)) 
+					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1 || software_reset[1])) 
 			present_state 		<= present_state & 32'hFFFF_FFFE;
 		// Command Inhibit (DAT) bit.
 		// need to take care of these two conditions
@@ -511,23 +565,25 @@ module sd_host_controller(
 		// end bit of write command detected
 		// This bit could also be set when we are reading data.
 		// This bit is set after the end bit of the write command. 
-		// But the command has to be the send data command (24d, 18h).
+		// But the command has to be the send data command (24d, 18h) or (25d, 19h).
 		// Update present_state[1], Command Inhibit (DAT).
-		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && (command[13:8] == 6'h18))	// rising edge 
+		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && ((command[13:8] == 6'h18) || (command[13:8] == 6'h19)))	// rising edge 
 			present_state	 	<= present_state | 32'h0000_0004;
 		// Clear it when DAT0 is not busy any more and we have reached the last 
 		// block of data, ie, the last decriptor table.					  
 		// We should also clear this bit if the SD card does not drive the bus signal
 		// for 8 SD clocks.  We could also clear this bit after some time after we
 		// sent the data just so we don't get stuck in this bit.
-		else if (!wr_busy && wr_busy_z1 /*&& end_descr*/) 
-			present_state 		<= present_state & 32'hFFFF_FFFB;
-//		// If card is inserted, bit 16
-//		else if (card_inserted_strb)
-//			present_state		<= present_state | 32'h0001_0000;
-//		// If card is removed, bit 16
-//		else if (card_removed_strb) 
-//			present_state		<= present_state & 32'hFFFE_FFFF;
+		else if (!wr_busy && wr_busy_z1 && end_descr)            // falling edge                        
+			present_state 		<= present_state & 32'hFFFF_FFFB;   
+//		// If card is inserted, bit 16                           
+//		else if (card_inserted_strb)                             
+//			present_state		<= present_state | 32'h0001_0000;   
+//		// If card is removed, bit 16                            
+//		else if (card_removed_strb)                              
+//			present_state		<= present_state & 32'hFFFE_FFFF;   
+		else if (software_reset[2])                              // software reset[2]                      
+			present_state 		<= present_state & 32'hFFF0_FFF9;
 		else 
 			present_state 		<= present_state;
 	end  	
@@ -539,7 +595,6 @@ module sd_host_controller(
 	// error (Refer to Command CRC Error in Section 2.2.18) or because of Command
 	// Not Issued By Auto CMD12 Error (Refer to Section 2.2.23), this bit shall remain 1
 	// and the Command Complete is not set.
-	
 	// (1) In the case of a Read Transaction
 	// This bit is set at the falling edge of Read Transfer Active Status
 	// (Present State Register).
@@ -597,7 +652,7 @@ module sd_host_controller(
 			normal_int_status		<= normal_int_status | 16'h0040;
 		else if (normal_int_status_enb[7] && 							// if enabled
 					(!present_state[16] && present_state_z1[16]) && // falling edge 
-					!error_int_status[7])  							// and no error 
+					!error_int_status[7])  							      // and no error 
 			// Card Removal Int set, could be cleared by host bus driver 
 			// (RW1C command)		
 			normal_int_status 	<= normal_int_status | 16'h0080;
@@ -622,6 +677,10 @@ module sd_host_controller(
 			else  // leave everything as is
 				normal_int_status <= normal_int_status;
 		end
+		else if (software_reset[1])                              // clear bit if 1 for software reset
+			normal_int_status    <= normal_int_status & 16'hFFFE;	// Command Complete Int	
+		else if (software_reset[2])                              // clear bit if 1 for software reset
+			normal_int_status    <= normal_int_status & 16'hFFC1;	// 	
 		else  // default case
 			normal_int_status 	<= normal_int_status;
 //			normal_int_status[1] <= normal_int_status[1];
@@ -863,13 +922,13 @@ module sd_host_controller(
 	always@(posedge clk)
 	begin
 		if (reset)
-			adma_system_addr <= {64{1'b0}};
+			adma_system_addr  <= {32{1'b0}};
 		else if (adma_sar_inc_strb)
-			adma_system_addr <= adma_system_addr + 1'b1; 
+			adma_system_addr  <= adma_system_addr + 1'b1; 
 		else if (wr_reg_index == 12'h058 && wr_reg_strb)       
-			adma_system_addr 	<= {{32{1'b0}}, wr_reg_input};
+			adma_system_addr  <= wr_reg_input;
 		else
-			adma_system_addr <= adma_system_addr;
+			adma_system_addr  <= adma_system_addr;
 	end // we have to put this together with the host bus driver code.	
 	
 	// 2.2.14 Clock Control Register (Offset 02Ch)
@@ -927,6 +986,21 @@ module sd_host_controller(
 		else  // default case
 			clock_cntrl 	<= clock_cntrl;
 	end		
+	
+	// 2.2.16 Software Reset Register (Offset 02Fh)
+	// A reset pulse is generated when writing 1 to each bit of this register. 
+   // After completing the reset, the Host Controller shall clear each bit. 
+   // Because it takes some time to complete software reset, the SD Host Driver
+   // shall confirm that these bits are 0.
+	always@(posedge clk)
+	begin
+		if (reset) 
+			software_reset 	<= 8'h00;
+		else if (wr_reg_index == 12'h02F && wr_reg_strb)       
+			software_reset 	<= wr_reg_input[7:0];
+		else  // default case
+			software_reset 	<= software_reset;
+	end 
 	
 	// Write to 2.2.4 Argument 1 Register (Offset 008h).
 	// Update the argument field of the send command.
@@ -1025,23 +1099,30 @@ module sd_host_controller(
 	////////////////////////////////////////////////////////////////////////////
 	
 	// We will start to send the command when we get the wr_reg_index == 12'h00E
-	// register.  Also, when we have finished trasfering all the data blocks 
-	// (Transfer Complete), we need to send the stop command CMD12.
-	// But only if Auto CMD12 is enabled in the transfer_mode.
+	// register.  
 	always@(posedge clk)
 	begin
 		if (reset)
 			new_cmd_set_strb 	<= 1'b0;
 		else if (wr_reg_index == 12'h00E && wr_reg_strb)       
-			new_cmd_set_strb 	<= 1'b1;														
-		// When we have finished trasfering all the data blocks 
-		// (Transfer Complete), we need to send the stop command CMD12. 
-		// But only if Auto CMD12 is enabled in the transfer_mode.
-//		else if (normal_int_status[1] == 1'b1 && transfer_mode[3:2] == 2'b01)
-//			new_cmd_set_strb 	<= 1'b1;
+			new_cmd_set_strb 	<= 1'b1;
 		else  // default case
 			new_cmd_set_strb 	<= 1'b0;
 	end				 	 
+	
+	// We will start to send the command when we get the wr_reg_index == 12'h00E
+	// register.  Also, when we have finished trasfering all the data blocks 
+	// (Transfer Complete), we need to send the stop command CMD12.
+	// But only if Auto CMD12 is enabled in the transfer_mode.
+//	always@(posedge clk)
+//	begin
+//		if (reset)
+//			snd_auto_cmd12_strb 	<= 1'b0;
+//      else if ((~normal_int_status_z1[1] && normal_int_status[1]) && transfer_mode[3:2] == 2'b01)
+//			snd_auto_cmd12_strb 	<= 1'b1;
+//		else  // default case cause a strobe
+//			snd_auto_cmd12_strb 	<= 1'b0;
+//	end	
 																	
 	// We'll update the command crc error here.
 	always@(posedge clk)
@@ -1135,7 +1216,7 @@ module sd_host_controller(
 		.clk(clk), 		// Clock input 50 MHz 
 		.reset(reset),	// GSR
 		.enable(1'b1), 	
-		.start_strb(new_cmd_strb || fifo_rdy_strb), // start the timing  	 	
+		.start_strb(new_cmd_strb || adma2_rdy_to_snd_dat_strb), // start the timing  	 	
 		.cntr(), 
 		.strb(fin_strtchStrb40h) 
 	);										
@@ -1156,7 +1237,7 @@ module sd_host_controller(
 		.clk(clk), 		// Clock input 50 MHz 
 		.reset(reset),	// GSR
 		.enable(1'b1), 	
-		.start_strb(new_cmd_strb || fifo_rdy_strb), // start the timing  	 	
+		.start_strb(new_cmd_strb || adma2_rdy_to_snd_dat_strb), // start the timing  	 	
 		.cntr(), 
 		.strb(fin_strtchStrb10h) 
 	);							 
@@ -1188,7 +1269,7 @@ module sd_host_controller(
 	begin
 		if (reset)
 			strt_snd_data_strb 	<= 1'b0;
-		else if (fifo_rdy_strb)
+		else if (adma2_rdy_to_snd_dat_strb)
 			strt_snd_data_strb 	<= 1'b1;	// set the latch				  
 			// If we're using 390 kHz sd clock.
 		else if ((clock_cntrl[15:8] >> 8'h02) && fin_strtchStrb40h)
@@ -1265,6 +1346,8 @@ module sd_host_controller(
 	
 	// This is for sending command and receiving response.
 	// Need to activate the sdc_clk to use this module.
+   // This module will be used if you write something to
+   // the Command (0x00E) register or auto cmd12 is activated.
 	cmd_serial_mod cmd_serial_mod_u1(
 		.sd_clk(sdc_clk),										//input	
 		.reset(reset),											//input	
@@ -1286,23 +1369,42 @@ module sd_host_controller(
 	// When that is done we can start to send out
 	// the data.
 	adma2_fsm adma2_fsm_u2(
-		.clk(clk),										                                   //input 
-		.reset(reset),																				  //input 
-		.strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	    input 
-		.continue_blk_send(continue_blk_send),												  //input 
-		.dat_tf_done(dat_tf_done),														 		  //input	
-		.adma_sar_inc_strb(adma_sar_inc_strb), 											  //output
-		.strt_fifo_strb(strt_fifo_strb)	      // start to send data to sd card.  //output
-	);		
+		.clk(clk),										                                    //                                     input 
+		.reset(reset),																				   //                                     input 
+      // from data_tf_using_adma_u8 module.                                                                             
+		.strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	                                          input 
+		.continue_blk_send(continue_blk_send),												   //                                     input 
+		.dat_tf_done(!dat_tf_done_z1 && dat_tf_done),									   //                                     input	
+		.wr_busy(wr_busy),														 		         //                                     input	
+      .des_fifo_rd_strb(des_fifo_rd_strb),                                       //                                     output
+      .des_rd_data(des_rd_data),             // descriptor item                                                         input
+      .adma_system_addr_strb(adma_system_addr_strb),                             //                                     output
+		.adma_sar_inc_strb(adma_sar_inc_strb), 											   //                                     output
+      .adma2_rdy_to_snd_dat_strb(adma2_rdy_to_snd_dat_strb),                     //                                     output
+      // This strobe starts to build the fifo.
+      // Another strobe will actually starts the sending.
+		//.strt_fifo_strb(strt_fifo_strb)	      // start to send data to sd card.   // output
+      .snd_cmd13_strb(snd_cmd13_strb),          // send cmd13 to poll for card ready
+      .transfer_mode(transfer_mode),                                             //                                     input
+      .fin_cmnd_strb(fin_cmnd_strb),            // finished sending out cmd13, response is ready                        input
+      // need to send this command to the host bus driver
+      .snd_auto_cmd12_strb(snd_auto_cmd12_strb),                                 //                                     output
+      .card_rdy_bit(response[8])                // this bit holds the card status bit for card ready                    input
+	);	
 	
 	sdc_snd_dat_1_bit sdc_snd_dat_1_bit_u10(
    	.sd_clk(sdc_clk),									//														input 
    	.reset(reset),										//														input 
+       // This signal fetches the first data from the data bram.
+       // It is activated when the fifo_rdy_strb is valid
 		.strt_snd_data_strb(strt_snd_data_strb),	// start to send data to sd card.			input	
-   	.nxt_dat_strb(nxt_dat_strb),					// Strobe for new data set of 64 bits.		output
+   	.new_dat_strb(new_dat_strb),					// Strobe for new data set of 64 bits.		output
 		.sm_rd_data(sm_rd_data),						// from the system memory RAM					input	 
 		.pkt_crc(pkt_crc),								// 512 bytes packet CRC.						input 
-		.dat_tf_done(dat_tf_done),						// Finished with data transfer.				output  
+      // Finished with data transfer. but the line could still be busy because the sd card
+      // is still writing the data to its memory.  Only when the card is not busy any more
+      // can we start another block write if necessary.
+		.dat_tf_done(dat_tf_done),						// 				                           output  
 		.wr_busy(wr_busy),								// sd card is writing data to memory		output
 		.D0_in(D0_in),										// Data in from sd card.						input
    	.dat_out(D0_out)									//														output
@@ -1326,24 +1428,24 @@ module sd_host_controller(
 	// another data block.  When the signal is not busy any more, we
 	// can continue with the next data block.
 	// It will also take care of data coming back from the SD card.
-	sdc_dat_mod sdc_dat_mod_u3(
-		.sd_clk(sdc_clk),
-		.reset(reset),
-		.new_dat_set_strb(new_dat_set_strb),// ready to package the command
-		.tf_data(sm_rd_data), 					// from  
-		.dat_crc16_out(dat_crc16_out),
-		.wr_busy(/*wr_busy*/), 					// indicates that the sd card is busy
-		.D0_in(D0_in), 							// only D0 has a busy signal			 
-		.D0_out(), 									
-		.D1_in(D1_in),			  									
-		.D1_out(D1_out),
-		.D2_in(D2_in),			 
-		.D2_out(D2_out),
-		.D3_in(D3_in),			 
-		.D3_out(D3_out),		 
-		.new_rd0_pkt_strb(new_rd0_pkt_strb),
-		.rd0_pkt(rd0_pkt)
-	);		 									 
+//	sdc_dat_mod sdc_dat_mod_u3(
+//		.sd_clk(sdc_clk),
+//		.reset(reset),
+//		.new_dat_set_strb(new_dat_set_strb),// ready to package the command
+//		.tf_data(sm_rd_data), 					// from  
+//		.dat_crc16_out(dat_crc16_out),
+//		.wr_busy(/*wr_busy*/), 					// indicates that the sd card is busy
+//		.D0_in(D0_in), 							// only D0 has a busy signal			 
+//		.D0_out(), 									
+//		.D1_in(D1_in),			  									
+//		.D1_out(D1_out),
+//		.D2_in(D2_in),			 
+//		.D2_out(D2_out),
+//		.D3_in(D3_in),			 
+//		.D3_out(D3_out),		 
+//		.new_rd0_pkt_strb(new_rd0_pkt_strb),
+//		.rd0_pkt(rd0_pkt)
+//	);		 									 
 	
 	// Parse CRC of DAT0.
 	always@(posedge clk)
