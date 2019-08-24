@@ -28,7 +28,7 @@ module data_tf_using_adma(
 	input 				data_in_strb, 
 	// last set of data from puc (or other host)
 	input 				last_set_of_data_strb,
-	input 	[35:0] 	date,                      // date from puc
+	input 	[35:0] 	date,                // date from puc
 	// data from puc (or other host) per strobe
 	// We'll accept 36 bits of data at a time.
    // Not using it anywhere.
@@ -37,28 +37,28 @@ module data_tf_using_adma(
 	input		[15:0]	blk_count,
 	input		[31:0] 	argument,
 	input		[15:0]	tf_mode,
-	input		[4:0]	   des_rd_addr,               // descriptor table item														  
+	input		[4:0]	   des_rd_addr,         // descriptor table item														  
 	
 	// For Host Controller Register Map.
-	output	[11:0]	rd_reg_index, 	            // for the sd host controller memory map 
-	input 	[127:0]	rd_reg_input, 	            // from the sd host controller memory map
-	output				wr_reg_strb, 	            // for the sd host controller memory map
-	output	[11:0]	wr_reg_index, 	            // for the sd host controller memory map
-	output 	[31:0]	wr_reg_output,             // for the sd host controller memory map
+	output	[11:0]	rd_reg_index, 	      // for the sd host controller memory map 
+	input 	[127:0]	rd_reg_input, 	      // from the sd host controller memory map
+	output				wr_reg_strb, 	      // for the sd host controller memory map
+	output	[11:0]	wr_reg_index, 	      // for the sd host controller memory map
+	output 	[31:0]	wr_reg_output,       // for the sd host controller memory map
 	output 	[2:0]		reg_attr,	
-   output            wr_descr_table_strb,       // start descriptor table                                        
+   output            wr_descr_table_strb,	// start descriptor table                                        
 	
 	output				issue_sd_cmd_strb,
 	output				issue_abort_cmd,
 	
-	output	[7:0] 	wr_ram_addr,               // for the system memory ram	
-	output 	[71:0]	wr_ram_data, 	            // for the system memory ram
-	output			 	wr_ram_enb,		            // for the system memory ram
+	output	[7:0] 	wr_ram_addr,         // for the system memory ram	
+	output 	[71:0]	wr_ram_data, 	      // for the system memory ram
+	output			 	wr_ram_enb,		      // for the system memory ram
 	
-	output reg		   strt_fifo_strb,	         // start to save data into the fifo.
-   input             fifo_rdy_strb,             // ready to start sending data out
-	output reg			strt_adma_strb,	         // Start the ADMA state machine.
-	output				dat_tf_adma_proc 	         // indicates that we are in this module
+	output reg		   strt_fifo_strb,	   // start to save data into the fifo.
+   input             fifo_rdy_strb,       // ready to start sending data out
+	output reg			strt_adma_strb,	   // Start the ADMA state machine.
+	output				dat_tf_adma_proc 	   // indicates that we are in this module
 	);
 	
 	// Registers
