@@ -6,6 +6,8 @@
 # This is the do file for the sdc controller.
 #vsim -novopt work.sdc_controller_mod
 vsim -novopt work.sdc_controller_mod_tb2
+#vsim -vopt work.sdc_controller_mod_tb2
+
 
 #add wave -position end sim:/sdc_controller_mod/clk
 #add wave -position end sim:/sdc_controller_mod/fifo_data
@@ -60,6 +62,9 @@ add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controlle
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/end_descr
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/wr_busy
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/wr_busy_z1
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/des_fifo_rd_strb
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/des_fifo_rd_strb_z5
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/des_rd_data
 # hc/snd_dat
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/sdc_snd_dat_1_bit_u10/oe_reg
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/sdc_snd_dat_1_bit_u10/sm_rd_data
@@ -77,6 +82,8 @@ add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controlle
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/sdc_snd_dat_1_bit_u10/newDatSetCntr/cntr
 # For adma2_fsm
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/adma2_fsm_u2/state
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/adma2_fsm_u2/strt_wait_cntr
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_controller_u2/adma2_fsm_u2/done_wait_strb
 # For host bus driver
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/wr_b_strb
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/wr_b_strb_z1
@@ -97,4 +104,4 @@ add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_drive
 
 # Create the system clock.
 #force -freeze sim:/sdc_controller_mod/clk 1 0, 0 {10 ns} -r 20 ns
-run 500 ms
+run 460 ms

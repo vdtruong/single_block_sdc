@@ -235,21 +235,21 @@ module adma2_fsm(
 	// Here we start to fetch the data from the System Memory RAM
 	// and send it to the SD card.  We will stop when we come to
 	// the last data set (block).
-   parameter state_stop 	      = 15'b_0000_0000_0000_0001; 	// stop dma
-   parameter state_fds 		      = 15'b_0000_0000_0000_0010;	// fetch descr
-   parameter state_fds_read      = 15'b_0000_0000_0000_0100;	// check descr for valid
-   parameter state_cadr 	      = 15'b_0000_0000_0000_1000;	// change address
-   parameter state_cadr_end_0    = 15'b_0000_0000_0001_0000;	// not finished with descriptor
-   parameter state_cadr_end_1    = 15'b_0000_0000_0010_0000;	// finish with descriptor
-   parameter state_tfr		      = 15'b_0000_0000_0100_0000;	// transfer data 
-   parameter state_tfr_wt	      = 15'b_0000_0000_1000_0000;	// transfer data wait
-   parameter state_auto_cmd12    = 15'b_0000_0001_0000_0000;	// send auto cmd12
-   parameter state_auto_cmd12_wt = 15'b_0000_0010_0000_0000;	// send auto cmd12 wait
-   parameter state_qry_stat      = 15'b_0000_0100_0000_0000;	// send cmd13 to poll for card ready
-   parameter state_chk_stat      = 15'b_0000_1000_0000_0000;	// wait for cm13 response
-   parameter state_pre_wait      = 15'b_0001_0000_0000_0000;	// start the wait countr strobe
-   parameter state_wait_20ms     = 15'b_0010_0000_0000_0000;	// wait for 20 ms
-   parameter state_chk_busy      = 15'b_0100_0000_0000_0000;	// check D0 line for busy
+   parameter state_stop 	      = 15'b_0000_0000_0000_0001; 	// stop dma										x0001
+   parameter state_fds 		      = 15'b_0000_0000_0000_0010;	// fetch descr									x0002
+   parameter state_fds_read      = 15'b_0000_0000_0000_0100;	// check descr for valid					x0004
+   parameter state_cadr 	      = 15'b_0000_0000_0000_1000;	// change address								x0008
+   parameter state_cadr_end_0    = 15'b_0000_0000_0001_0000;	// not finished with descriptor			x0010
+   parameter state_cadr_end_1    = 15'b_0000_0000_0010_0000;	// finish with descriptor					x0020
+   parameter state_tfr		      = 15'b_0000_0000_0100_0000;	// transfer data 								x0040
+   parameter state_tfr_wt	      = 15'b_0000_0000_1000_0000;	// transfer data wait						x0080
+   parameter state_auto_cmd12    = 15'b_0000_0001_0000_0000;	// send auto cmd12							x0100
+   parameter state_auto_cmd12_wt = 15'b_0000_0010_0000_0000;	// send auto cmd12 wait						x0200
+   parameter state_qry_stat      = 15'b_0000_0100_0000_0000;	// send cmd13 to poll for card ready	x0400
+   parameter state_chk_stat      = 15'b_0000_1000_0000_0000;	// wait for cm13 response					x0800
+   parameter state_pre_wait      = 15'b_0001_0000_0000_0000;	// start the wait countr strobe			x1000
+   parameter state_wait_20ms     = 15'b_0010_0000_0000_0000;	// wait for 20 ms								x2000
+   parameter state_chk_busy      = 15'b_0100_0000_0000_0000;	// check D0 line for busy					x4000
 
    (* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
 	SAFE_RECOVERY_STATE="state_stop" *) 
@@ -271,7 +271,7 @@ module adma2_fsm(
       end
       else
          (* PARALLEL_CASE *) case (state)
-            state_stop : begin
+            state_stop : begin				// x0001
                if (strt_adma_strb | continue_blk_send)
                   state 					   <= state_fds;
                else if (!strt_adma_strb | !continue_blk_send)
@@ -289,7 +289,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;	
             end                              
-            state_fds : begin                
+            state_fds : begin           	// x0002     
                state 						   <= state_fds_read;   
                //<outputs> <= <values>;   		  									   
 					//strt_fifo_strb				   <= 1'b0;	     
@@ -304,7 +304,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;	 		   
             end  													
-            state_fds_read : begin
+            state_fds_read : begin			// x0004
                if (des_fifo_rd_strb_z6) begin         // don't check until after 6 clocks    
                   if (des_attr[0])                    // if valid = 1   
                      state 		         <= state_cadr;         
@@ -325,7 +325,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;	
             end
-            state_cadr : begin    
+            state_cadr : begin    			// x0008
                if (!des_attr[1] && ~des_attr[5])      // if end = 0 and tran = 0   
                   state 		            <= state_fds;
                if (des_attr[1] && ~des_attr[5])       // if end = 1 and tran = 0   
@@ -345,7 +345,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;	
             end                           
-            state_cadr_end_0 : begin      
+            state_cadr_end_0 : begin		// x0010     
                state 		               <= state_tfr; 
                //<outputs> <= <values>;		 		
 					//strt_fifo_strb				   <= 1'b0;	      
@@ -359,7 +359,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;	
             end                           
-            state_cadr_end_1 : begin       
+            state_cadr_end_1 : begin		// x0020       
                state 		               <= state_stop;  
                //<outputs> <= <values>;		 		
 					//strt_fifo_strb				   <= 1'b0;	      
@@ -372,7 +372,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end                           
-            state_tfr : begin   
+            state_tfr : begin   				// x0040
 					// Here we start to send out the data to the sd card.
 					// Or read data from the sd card.  We will only transfer the
 					// data only if the D0 line is not busy.          
@@ -389,7 +389,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end	                        
-            state_tfr_wt : begin
+            state_tfr_wt : begin				// x0080
                // We will wait here for each block of data to be sent or read.
                // After sending each block, poll to see if the card is ready to
                // take another block.  When the card is ready for the next block,
@@ -423,7 +423,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end
-            state_qry_stat : begin   
+            state_qry_stat : begin   		// x0100
 					// Send out cmd13 to see if card is ready for next data.          
                state 						   <= state_chk_stat;   
                //<outputs> <= <values>;   
@@ -436,7 +436,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
                end
-            state_chk_stat : begin   
+            state_chk_stat : begin   		// x0200
 					// Stay here and wait for ready from sd card.
                // If response is not ready and we have not time out,
                // resend cmd13.  If time has ran out and the card
@@ -461,7 +461,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end										  
-            state_auto_cmd12 : begin   
+            state_auto_cmd12 : begin   	// x0400
 					// Send out cmd12 when finished with multiple send blocks          
                state 						   <= state_auto_cmd12_wt;   
                //<outputs> <= <values>;  
@@ -476,7 +476,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end										  
-            state_auto_cmd12_wt : begin             
+            state_auto_cmd12_wt : begin 	// x0800            
                state 						   <= state_stop;   
                //<outputs> <= <values>;  
 					//strt_fifo_strb				   <= 1'b1; // from system memory ram
@@ -490,7 +490,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end										  
-            state_pre_wait : begin             
+            state_pre_wait : begin   		// x1000          
                state 						   <= state_wait_20ms;   
                //<outputs> <= <values>;  
 					//strt_fifo_strb				   <= 1'b1; // from system memory ram
@@ -504,7 +504,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b1;
                wait_cnt                   <= wait_cnt + 4'h1;
             end						
-            state_wait_20ms : begin   
+            state_wait_20ms : begin   		// x2000
 					// Stay here and wait for x amount of time.
                // When done, go check to see if the sd card is not busy.
                if (done_wait_strb && !des_attr[1])
@@ -525,7 +525,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= wait_cnt;
             end
-            state_chk_busy : begin   
+            state_chk_busy : begin   		// x4000
                // Check to see if the sd card is not busy.
                if (!wr_busy)
                   state 						<= state_fds;

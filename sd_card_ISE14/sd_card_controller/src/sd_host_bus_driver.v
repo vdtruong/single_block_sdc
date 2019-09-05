@@ -1264,6 +1264,8 @@ module sd_host_bus_driver
 	end					
       
    // Descriptor bram.
+	// Once the fifo controller decides the wr address, it takes two clocks
+	// later to register into this bram the data.
   	defparam BlockRAM_DPM_32_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_DES_FILE;  
   	BlockRAM_DPM_32_x_64  BlockRAM_DPM_32_x_64_i
   	(	
