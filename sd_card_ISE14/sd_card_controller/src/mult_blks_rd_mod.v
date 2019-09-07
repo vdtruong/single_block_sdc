@@ -3,41 +3,21 @@
 // Company:       
 // Engineer:      VDT
 // 
-// Create Date:    11:33:35 10/15/2012 
+// Create Date:    4:44 09/06/2019 
 // Design Name: 
-// Module Name:    adma2_fsm 
+// Module Name:    mult_blks_rd_mod 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
-// Description: 
+// Description: 	This modules reads in multiple blocks of data from the sd
+// 					card.
 //
-// Dependencies: 	This modules takes care of the advanced dma state machine.
-//						Section 1.13.5 ADMA2 States.	This state machine will fetch
-//       	      one descriptor line at a time and send one block of data.
-//                It will do this 16 times for 16 blocks of data.
-//						One block of data is 512 bytes of data.
-//						This module will also take care of reading blocks of data
-//						coming back from the sd card.  Each descriptor line is for
-//						one block of data and each CRC coming back.
 //
-// Revision:      07/20/2016
-//                Implemented multiple descriptor tables.  Before, for single 
-//                block transfer, did not use multiple descriptor tables.
-//                01/14/2017
-//                We will send out cmd13 to poll the status of the sd card.
-//                If it is ready to receive the next block of data, then we
-//                will send the next block of data.  It seems that waiting 
-//                for the card to release the data line is not reliable.
-//                02/07/2017
-//                Try to wait about 20 ms after we write the block of data,
-//                then look to see if the card is still busy.  If it is busy
-//                try to wait another 20 ms until we get a no busy signal.
-//                We try this for up to 10 times before sending out the cmd12
-//                to stop the transmission.
-//                02/12/2017
-//                After finishing with all blocks, wait x amount of time before
-//                sending out cmd12.
-// Revision 0.01 - File Created
+// Dependencies: 	
+//
+// Revision:      09/06/2019 	Initial version.
+//               
+//               Revision 0.01 - File Created
 // Additional Comments: 
 //
 ///////////////////////////////////////////////////////////////////////////////

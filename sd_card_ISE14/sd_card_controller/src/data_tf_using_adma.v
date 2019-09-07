@@ -11,7 +11,9 @@
 // Tool versions: 
 // Description: 	This module sends out a command with data going out or 
 //						comming back.  3.7.2.3 Using ADMA, Figure 3-15, pg 115.
-//
+//						This module controls the adma2 module.  The adma2 will tell
+//						this module when the data transfer has completed from the
+//						end of the descriptor tables.
 // Dependencies: 
 //
 // Revision: 07/25/2016
@@ -571,6 +573,8 @@ module data_tf_using_adma(
 					// Bit 8 of the card_compl_packet will tell us this.
 					// If it is ready to accept data, we will start the ADMA2 state
 					// machine.  This will start to send the data to the SD card.
+					// If we are receiving data, the command will be cmd17 for
+					// single block and cmd18 for multiple blocks read.
 					wr_reg_index_reg 			<= 12'h00E;
 					wr_reg_output_reg			<= {{16{1'b0}}, command};
 					reg_attr_reg				<= 3'h0;                   // type of bit write      
@@ -707,6 +711,15 @@ module data_tf_using_adma(
             ste_get_resp_wt : begin										// 26'b00_0000_0100_0000_0000_0000_0000		
 					// If the card is ready for data, start to fill up the
                // fifo.
+					// If the mode is to receive data from the sd card,
+					// start collecting data from the D0 line.
+					// We will need a different state to accept data.
+					// We will need a separate module to collect data from the sd
+					// card.  It will have its own state machine.  We will need to
+					// know when to latch the 64 bits of data into the BRAM,
+					// including the CRC.  Also, the ADAMA2 state machine needs to
+					// update the descriptor tables as we finished each block of
+					// data.
                if (read_clks_tout && rdy_for_dat)
                   state 					<= ste_strt_fifo;
                else if (!read_clks_tout)
