@@ -110,9 +110,15 @@ module sd_host_bus_driver
    //input       [5:0]    sdc_cmd_indx,        // command index for sdc command format
    input                snd_auto_cmd12_strb, // send auto cmd12 to stop multiple blocks transfer
    input                snd_cmd13_strb,      // send auto cmd13 to poll if sd card is ready for next block
-   output               fin_cmnd_strb        // has finished sending out the command, ready to check response
-	//input					   issue_abort_cmd		
-   );
+   output               fin_cmnd_strb,       // has finished sending out the command, ready to check response
+	//input					   issue_abort_cmd
+	// These are for receiving dat from the sd card.  Caution, they use the
+	// slower sdc clock.
+	input 					rcv_wrd_rdy_strb,	// strobe to latch data word into bram from sd card	
+	input						rcv_crc_rdy_strb,	// strobe to latch crc into bram from sd card after 1 block of data
+	input			[63:0]	rcv_dat_wrd,		// received word from sd card (64 bits)	
+	input			[15:0]	rcv_crc_16			// received crc from sd card for a block of data
+);
 	 
 	// Registers
 	reg				host_tst_cmd_strb_z1;
@@ -228,9 +234,15 @@ module sd_host_bus_driver
    reg            snd_cmd13_strb_z1;         // delay
    reg            snd_cmd13_strb_z2;         // delay
    reg            snd_cmd13_strb_z3;         // delay
-	
+	// The following are for data coming from the sd card.
+	reg 				rcv_wrd_strb;
+	reg 				rcv_crc_strb;
+	reg 				rcv_wrd_strb_z1;				// delay
+	reg 				rcv_crc_strb_z1;				// delay
+	reg				rcv_wrd_rdy_strb_z1;			// delay
+	reg				rcv_crc_rdy_strb_z1;			// delay
+
 	// Wires
-   
    wire                    wr_descr_table_strb; // start to write descriptor tables
    wire  [4:0]             des_rd_addr;
    wire  [4:0]             des_wr_addr;
@@ -435,7 +447,13 @@ module sd_host_bus_driver
       wr_descr_table_strb_z44    <= 1'b0;
       wr_descr_table_strb_z45    <= 1'b0;
       wr_descr_table_strb_z46    <= 1'b0;
-      wr_descr_table_strb_z47    <= 1'b0;      
+      wr_descr_table_strb_z47    <= 1'b0;
+		rcv_wrd_strb					<= 1'b0;
+		rcv_crc_strb					<= 1'b0;
+		rcv_wrd_strb_z1				<= 1'b0;
+		rcv_crc_strb_z1				<= 1'b0;
+		rcv_wrd_rdy_strb_z1			<= 1'b0;
+		rcv_crc_rdy_strb_z1			<= 1'b0;
 	end
 	
 	// Assign registers to outputs.
@@ -519,6 +537,8 @@ module sd_host_bus_driver
          snd_cmd13_strb_z1          <= 1'b0;
          snd_cmd13_strb_z2          <= 1'b0;
          snd_cmd13_strb_z3          <= 1'b0;
+			rcv_wrd_strb_z1				<= 1'b0;
+			rcv_crc_strb_z1				<= 1'b0;
 		end
 		else begin
 			card_insrtd_reg		      <= card_inserted;	
@@ -590,6 +610,8 @@ module sd_host_bus_driver
          snd_cmd13_strb_z1          <= snd_cmd13_strb;
          snd_cmd13_strb_z2          <= snd_cmd13_strb_z1;
          snd_cmd13_strb_z3          <= snd_cmd13_strb_z2;
+			rcv_wrd_strb_z1				<= rcv_wrd_strb;
+			rcv_crc_strb_z1				<= rcv_crc_strb;
 		end	
 	end	
 	
@@ -851,20 +873,19 @@ module sd_host_bus_driver
 	
 	// Use this module when you want to enable an interrupt.
 	enb_interupt enb_interupt_u1 (
-		 .clk(clk), 
-		 .reset(reset), 
-		 .enb_int_strb(enb_int_strb), // don't forget to set up these regs.
-		 .enb_addr(enb_addr), 
-		 .enb_data(enb_data),
+		.clk(clk), 
+		.reset(reset), 
+		.enb_int_strb(enb_int_strb), // don't forget to set up these regs.
+		.enb_addr(enb_addr), 
+		.enb_data(enb_data),
 		 
-		 // For the Host Controller memory map
-		 .wr_reg_strb(wr_reg_strb_enb_int), 
-		 .wr_reg_index(wr_reg_index_enb_int), 
-		 .wr_reg_output(wr_reg_output_enb_int),
-		 .reg_attr(reg_attr_enb_int),
-		 
-		 .enb_int_proc(enb_int_proc)
-		 );
+		// For the Host Controller memory map
+		.wr_reg_strb(wr_reg_strb_enb_int), 
+		.wr_reg_index(wr_reg_index_enb_int), 
+		.wr_reg_output(wr_reg_output_enb_int),
+		.reg_attr(reg_attr_enb_int), 
+		.enb_int_proc(enb_int_proc)
+	);
 	
 	// This is when the SD Card is detected.
 	// Either insertion or removal.
@@ -1223,26 +1244,10 @@ module sd_host_bus_driver
       .fifo_rdy_strb(blocks_crc_done_strb_z3),                       //    input            
 		.strt_adma_strb(strt_adma_strb),	// start the adma state machine		output
 		.dat_tf_adma_proc(dat_tf_adma_proc)									 	//		output
-		);											 
+		);											 	
 	
-	//-------------------------------------------------------------------------
-	// When start_data_tf_strb strobes, create 16 descriptors in the system
-   // memory.
-	//-------------------------------------------------------------------------
-//	defparam descrptrCntr.dw 	= 5;
-//	// Change this to reflect the number of counts you want.
-//	defparam descrptrCntr.max	= 5'h10;	
-//	//-------------------------------------------------------------------------
-//	CounterSeq descrptrCntr(
-//		.clk(clk), 						      // Clock input 50 MHz 
-//		.reset(reset),	
-//		.enable(1'b1), 	
-//		.start_strb(start_data_tf_strb),	// 
-//		.cntr(descrptrCnt), 
-//		.strb() 	                        // output
-//	);			
-		
 	// Create the descriptor table.
+	// The last descriptor will end the ADMA2 state machine.
 	always @(posedge clk)
 	begin	
 		if(reset)					 			  	
@@ -1259,8 +1264,8 @@ module sd_host_bus_driver
       // last descriptor table.   
 		else if (wr_descr_table_strb_z45)  	  	
 			des_word	<= 64'h0000000002000023;   // Tran = 1, End = 1, Valid = 1.	
-		else								 					 	
-			des_word	<= des_word;	
+		//else								 					 	
+		//	des_word	<= des_word;	
 	end					
       
    // Descriptor bram.
@@ -1312,6 +1317,28 @@ module sd_host_bus_driver
  		.fifo_half() 							   // flag that fifo is half full		output               				
 	);													 
 		
+	// Create strobe from the rising edge of rcv_wrd_rdy_strb.
+	always@(posedge clk)
+	begin
+		if (reset) 
+			rcv_wrd_strb <= 1'b0;
+		else if (rcv_wrd_rdy_strb && !rcv_wrd_rdy_strb_z1) 
+			rcv_wrd_strb <= 1'b1;			  
+		else 
+			rcv_wrd_strb <= 1'b0;
+	end																								  
+	
+	// Create trobe from the rising edge of rcv_crc_rdy_strb.
+	always@(posedge clk)
+	begin
+		if (reset) 
+			rcv_crc_strb <= 1'b0;
+		else if (rcv_crc_rdy_strb && !rcv_crc_rdy_strb_z1) 
+			rcv_crc_strb <= 1'b1;			  
+		else 
+			rcv_crc_strb <= 1'b0;
+	end	
+	
 	// Decide which data to put into the Block RAM.
 	always @(posedge clk)
 		begin
@@ -1320,19 +1347,41 @@ module sd_host_bus_driver
 			else if (str_crc_strb_z1)		
 				// We include the stop bit after the crc.
 				datain	<= {pkt_crc,1'b1,{47{1'b1}}};
-   //      else if (descrptrCnt <= 5'h10)
-	//			datain	<= 64'h0000000002000021;   // First 15 descriptor tables. 
-   //      else if (descrptrCnt == 5'h10)
-	//			datain	<= 64'h0000000002000023;   // Last descriptor table.
-			else if (wr_b_strb)				  
+   		else if (wr_b_strb)				  
 				datain	<= fifo_data;
+	 		else if (rcv_wrd_strb) 
+				datain 	<= rcv_dat_wrd;
+			else if (rcv_crc_strb) 
+				datain 	<= rcv_crc_16;
 			//else				  
 				//datain	<= fifo_data;
 		end
-   	
+   
+	defparam FifoCntrllr.WIDTH	= SM_ADDR_WD; 
+	FifoController	FifoCntrllr					
+	(
+  		.clk(clk),                                   // System Clock	                                    input                               	                                                                
+  		.reset(reset || start_data_tf_strb),         // System Reset										         input
+  		.enable(),                                   // Enable Fifo   													input			                     
+      // Read Strobe to empty
+      // new_dat_strb is from the sdc_clk (slower), therefore, we use a rising edge
+  		.rd_a_strb((strt_snd_data_strb && !strt_snd_data_strb_z1)||(new_dat_strb && !nxt_dat_strb_z1)),//  input  
+      // For sending to sd card, only write when stop_recv_pkt is false.
+		// Also, use this fifo controller for reading back data from sd card.
+  		.wr_b_strb((!stop_recv_pkt && (wr_b_strb || str_crc_strb_z1)) | 	// for writing to sd card
+						(rcv_wrd_strb  | rcv_crc_strb)								// for reading data or crc from sd card
+		),		   																			// Write Strobe to fill		   	input 							 
+  		.addr_a(sm_rd_addr),   								// output address, read addr									output 
+  		.addr_b(sm_wr_addr),   								// output address, write addr									output 
+  		.fifo_empty(),                               // flag that fifo is empty									   output 
+  		.fifo_full(),  										// flag that fifo is full										output 
+ 		.fifo_half() 											// flag that fifo is half full		                  output
+	);	 		 
+	
 	// This is the System Memory RAM.
 	// It is for storing the data
-	// to be used in ADMA2.										  
+	// to be sent to the sd card.  It is also used to store data as they are
+	// coming back from the sd card.										  
 	// System Memory RAM (1057x64, 1057 items with 64 bits each).
    // The extra one is because our bram will start at 1 not zero.
    // 64 words x 64 bits = 4096 bits = 512 bytes = 1 block.
@@ -1348,10 +1397,10 @@ module sd_host_bus_driver
    // as it comes in one at a time.
   	//defparam BlockRAM_DPM_1057_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
   	//BlockRAM_DPM_1057_x_64  BlockRAM_DPM_1057_x_64_i
-  	//defparam BlockRAM_DPM_1040_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
-  	//BlockRAM_DPM_1040_x_64  BlockRAM_DPM_1040_x_64_i
-  	defparam BlockRAM_DPM_2048_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
-  	BlockRAM_DPM_2048_x_64  BlockRAM_DPM_2048_x_64_i
+  	defparam BlockRAM_DPM_1040_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
+  	BlockRAM_DPM_1040_x_64  BlockRAM_DPM_1040_x_64_i
+  	//defparam BlockRAM_DPM_2048_x_64_i.BRAM_DPM_INITIAL_FILE = BRAM_SYSMEM_FILE;  
+  	//BlockRAM_DPM_2048_x_64  BlockRAM_DPM_2048_x_64_i // This works.
   	(	
 		.clk(clk), 										                     //	input 					            
       .addr_a(sm_rd_addr),			                                 // input                            
@@ -1360,29 +1409,12 @@ module sd_host_bus_driver
       .addr_b(sm_wr_addr),    		                              // input           
       // Only strobe when we are still updating the block ram.
       // After we have 16 blocks, stop.
-      .wr_b(!stop_recv_pkt && (wr_b_strb_z2 || str_crc_strb_z2)), //	input                            
+      .wr_b((!stop_recv_pkt && (wr_b_strb_z2 || str_crc_strb_z2)) |
+					rcv_wrd_strb_z1 | rcv_crc_strb_z1),						//	input                            
       .datain_b(datain), 							                     // input                            
       .dataout_a(sm_rd_data),						                     // output                           
       .dataout_b()									                     // output                           
   	);   
-	
-  	defparam FifoCntrllr.WIDTH	= SM_ADDR_WD; 
-	FifoController	FifoCntrllr					
-	(
-  		.clk(clk),                                   // System Clock	                                    input                               	                                                                
-  		.reset(reset || start_data_tf_strb),         // System Reset										         input
-  		.enable(),                                   // Enable Fifo   													input			                     
-      // Read Strobe to empty
-      // new_dat_strb is from the sdc_clk (slower), therefore, we us a rising edge
-  		.rd_a_strb((strt_snd_data_strb && !strt_snd_data_strb_z1)||(new_dat_strb && !nxt_dat_strb_z1)),//  input  
-      // Only write when stop_recv_pkt is false
-  		.wr_b_strb(!stop_recv_pkt && (wr_b_strb || str_crc_strb_z1)),		   // Write Strobe to fill		   input 							 
-  		.addr_a(sm_rd_addr),   								// output address, read addr									output 
-  		.addr_b(sm_wr_addr),   								// output address, write addr									output 
-  		.fifo_empty(),                               // flag that fifo is empty									   output 
-  		.fifo_full(),  										// flag that fifo is full										output 
- 		.fifo_half() 											// flag that fifo is half full		                  output
-	);	 		 
 
 	// Capture and Shift (left) the data, MSBit first.
 	always@(posedge clk)

@@ -70,7 +70,13 @@ module sd_host_controller(
 	output					D3_out,
 	output     				SDC_CLK,
 	input						cmd_in,
-	output					cmd_out
+	output					cmd_out,
+	// These are for receiving data from the sd card.  Caution, they use sdc
+	// clock.
+	output					rcv_wrd_rdy_strb,		// 64 bits word from sd card, ready to be latched into bram
+	output					rcv_crc_rdy_strb,		// crc ready to be strobed into bram from sd card
+	output 		[63:0] 	rcv_dat_wrd,			// 64 bits word from sd card
+	output 		[15:0] 	rcv_crc_16				// crc from sd card
 );
 
 /*-----------------------------------------------------------------------
@@ -278,7 +284,7 @@ module sd_host_controller(
 	wire				adma_sar_inc_strb; 	  			// increments adma sys. addr. reg.	
   	wire          	adma2_rdy_to_snd_dat_strb; 	// send first word of each block
 						// careful, based on sdc_clk
-	wire				end_bit_det_strb;		      	// end bit of write command detected
+	//wire				end_bit_det_strb;		      	// end bit of write command detected
 	wire				wr_busy; 				      	// indicates that the sd card is busy
 	wire				new_dat_set_strb;       
 	wire 	[71:0]	tf_data;					   	  								 	 	
@@ -292,6 +298,10 @@ module sd_host_controller(
   	wire 	[4095:0] rd0_pkt;								// read packet from sd card, single line 
 	wire				new_rd0_pkt_strb;		   		// rd0 pkt ready.
 	
+	// For sdc_single_blk_rd_mod.  Caution, all these signals have the slow sdc
+	// clock.
+	wire 			tfc_rd;		// transfer complete for 1 block of data from sd card
+
 	// Initialize sequential logic
 	// Need to put the registers in here too.
 	initial			
@@ -327,7 +337,7 @@ module sd_host_controller(
 		des_fifo_rd_strb_z6			<= 1'b0;
 		dat_tf_done_z1			      <= 1'b0;
       //snd_auto_cmd12_strb 	      <= 1'b0;
-		
+
 		// Begin of map register initializing.
 		sdma_system_addr				<= {32{1'b0}};
 		block_size						<= {16{1'b0}};
@@ -368,23 +378,23 @@ module sd_host_controller(
 		slot_int_status				<= {16{1'b0}}; 
 		host_controller_version		<= {16{1'b0}};
 		// End of map register initializing.
-	end																
-	
+	end
+
 	// Set up delays.
 	always@(posedge clk)
 	begin
-		if (reset) begin							
+		if (reset) begin						
 			sd_clk_stab_reg_z1		<= 1'b0;
 			new_resp_pkt_strb_z1		<= 1'b0;
 			new_resp_pkt_strb_z2		<= 1'b0;
-			new_resp_2_pkt_strb_z1	<= 1'b0;	
+			new_resp_2_pkt_strb_z1	<= 1'b0;
 			end_bit_det_strb_z1		<= 1'b0;	 
-			present_state_z1			<= {32{1'b0}};	
-			normal_int_status_z1	   <= {16{1'b0}};	
-			wr_reg_strb_z1				<= 1'b0;		 	  	
-			wr_reg_strb_z2				<= 1'b0;				  
+			present_state_z1			<= {32{1'b0}};
+			normal_int_status_z1	   <= {16{1'b0}};
+			wr_reg_strb_z1				<= 1'b0;	
+			wr_reg_strb_z2				<= 1'b0;	
 			wr_busy_z1					<= 1'b0;
-			des_fifo_rd_strb_z1	   <= 1'b0; 
+			des_fifo_rd_strb_z1	   <= 1'b0;
 			des_fifo_rd_strb_z2	   <= 1'b0;
 			des_fifo_rd_strb_z3	   <= 1'b0;
 			des_fifo_rd_strb_z4	   <= 1'b0;
@@ -396,12 +406,12 @@ module sd_host_controller(
 			sd_clk_stab_reg_z1		<= sd_clk_stab_reg;
 			new_resp_pkt_strb_z1		<= new_resp_pkt_strb;
 			new_resp_pkt_strb_z2		<= new_resp_pkt_strb_z1;
-			new_resp_2_pkt_strb_z1	<= new_resp_2_pkt_strb;	
+			new_resp_2_pkt_strb_z1	<= new_resp_2_pkt_strb;
 			end_bit_det_strb_z1		<= end_bit_det_strb;
 			present_state_z1			<= present_state;	
 			normal_int_status_z1	   <= normal_int_status;	
 			wr_reg_strb_z1				<= wr_reg_strb;	  
-			wr_reg_strb_z2				<= wr_reg_strb_z1;			  
+			wr_reg_strb_z2				<= wr_reg_strb_z1;
 			wr_busy_z1					<= wr_busy;
 			des_fifo_rd_strb_z1	   <= des_fifo_rd_strb; 
 			des_fifo_rd_strb_z2	   <= des_fifo_rd_strb_z1;
@@ -411,7 +421,7 @@ module sd_host_controller(
 			des_fifo_rd_strb_z6	   <= des_fifo_rd_strb_z5;
          dat_tf_done_z1			   <= dat_tf_done;
 		end
-	end																							
+	end												
 	////////////////////////////////////////////////////////////////////////////
 	
 	// Select which map register to send away to the bus host driver.	
@@ -1291,9 +1301,9 @@ module sd_host_controller(
 	always@(posedge clk)
 	begin
 		if (reset)
-			post_r1_pkt_strb 	<= 1'b0;										 
+			post_r1_pkt_strb 	<= 1'b0;									
 			// rising edge
-		else if (new_resp_pkt_strb /*&& !new_resp_pkt_strb_z1*/)							 					  
+		else if (new_resp_pkt_strb /*&& !new_resp_pkt_strb_z1*/)
 			post_r1_pkt_strb 	<= 1'b1;						  		
 		else  	  	 		 	 
 			post_r1_pkt_strb 	<= 1'b0;
@@ -1303,9 +1313,9 @@ module sd_host_controller(
 	always@(posedge clk)
 	begin
 		if (reset)
-			post_r2_pkt_strb 	<= 1'b0;										 
+			post_r2_pkt_strb 	<= 1'b0;
 			// rising edge
-		else if (new_resp_2_pkt_strb /*&& !new_resp_2_pkt_strb_z1*/)							 					  
+		else if (new_resp_2_pkt_strb /*&& !new_resp_2_pkt_strb_z1*/)
 			post_r2_pkt_strb 	<= 1'b1;						  		
 		else  	  	 		 	 
 			post_r2_pkt_strb 	<= 1'b0;
@@ -1370,34 +1380,32 @@ module sd_host_controller(
    );						
 	
 	// This is the ADMA2 state machine.	
-	// Could use this module to start a data
-	// save into the fifo in the host bus module.
-	// When that is done we can start to send out
-	// the data.
 	adma2_fsm adma2_fsm_u2(
-		.clk(clk),										                                    //                                     input 
-		.reset(reset),																				   //                                     input 
-      // from data_tf_using_adma_u8 module.                                                                             
-		.strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	                                          input 
-		.continue_blk_send(continue_blk_send),												   //                                     input 
-		.dat_tf_done(!dat_tf_done_z1 && dat_tf_done),									   //                                     input	
-		.wr_busy(wr_busy),														 		         //                                     input	
-      .des_fifo_rd_strb(des_fifo_rd_strb),                                       //                                     output
-      .des_rd_data(des_rd_data),             // descriptor item                                                         input
-      .adma_system_addr_strb(adma_system_addr_strb),                             //                                     output
-		.adma_sar_inc_strb(adma_sar_inc_strb), 											   //                                     output
-      .adma2_rdy_to_snd_dat_strb(adma2_rdy_to_snd_dat_strb),                     //                                     output
+		.clk(clk),										                                    //                   input 
+		.reset(reset),																				   //                   input 
+      // from data_tf_using_adma_u8 module.                                                           
+		// .strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	                     input 
+		.continue_blk_send(continue_blk_send),												   //                   input 
+		.dat_tf_done(!dat_tf_done_z1 && dat_tf_done),									   //                   input	
+		.wr_busy(wr_busy),														 		         //                   input	
+      .des_fifo_rd_strb(des_fifo_rd_strb),                                       //                   output
+      .des_rd_data(des_rd_data),             // descriptor item                                       input
+      .adma_system_addr_strb(adma_system_addr_strb),                             //                   output
+		.adma_sar_inc_strb(adma_sar_inc_strb), 											   //                   output
+      .adma2_rdy_to_snd_dat_strb(adma2_rdy_to_snd_dat_strb),                     //                   output
       // This strobe starts to build the fifo.
       // Another strobe will actually starts the sending.
-		//.strt_fifo_strb(strt_fifo_strb)	      // start to send data to sd card.   // output
+		//.strt_fifo_strb(strt_fifo_strb)	      // start to send data to sd card.   // 					output
       .snd_cmd13_strb(snd_cmd13_strb),          // send cmd13 to poll for card ready
-      .transfer_mode(transfer_mode),                                             //                                     input
-      .fin_cmnd_strb(fin_cmnd_strb),            // finished sending out cmd13, response is ready                        input
+      .transfer_mode(transfer_mode),                                             //                   input
+      .fin_cmnd_strb(fin_cmnd_strb),            // finished sending out cmd13, response is ready      input
       // need to send this command to the host bus driver
-      .snd_auto_cmd12_strb(snd_auto_cmd12_strb),                                 //                                     output
-      .card_rdy_bit(response[8])                // this bit holds the card status bit for card ready                    input
+		// .snd_auto_cmd12_strb(snd_auto_cmd12_strb),                                 //                output
+      .card_rdy_bit(response[8]),               // this bit holds the card status bit for card ready  input
+		.tfc_rd(tfc_rd)									// reading one block from the sd card is complete		input
 	);	
 	
+	// This module sends the data to the sd card on a single line, ie D0.
 	sdc_snd_dat_1_bit sdc_snd_dat_1_bit_u10(
    	.sd_clk(sdc_clk),									//														input 
    	.reset(reset),										//														input 
@@ -1414,45 +1422,22 @@ module sd_host_controller(
 		.wr_busy(wr_busy),								// sd card is writing data to memory		output
 		.D0_in(D0_in),										// Data in from sd card.						input
    	.dat_out(D0_out)									//														output
-   );																													
-	 
-	// If rd_ram_addr is 1 or higher, send the data.							
-	// The first time we read for the descriptor table,
-	// the second time we read for the first data.  Continue
-	// to read the data from now until we are done.  Meanwhile, the
-	// adma2_fsm module will wait until we are done with the sending.
-		
-	// This should be right after we read back the first descriptor table.
-	// The second time we use the rd_ram_addr.  The second sm_rd_data.
-	// At this time, the adma2_fsm module should wait until we are done
-	// with sending.
-	// When done with last send, stop the adma2_fsm module.
-		
-	// This is for sending data.  It sends out one block of data at a time.
-	// It will divide the 72 bits of data equally among D0-D3.
-	// We could use the wr_busy signal to stop the adma2 from fetching
-	// another data block.  When the signal is not busy any more, we
-	// can continue with the next data block.
-	// It will also take care of data coming back from the SD card.
-//	sdc_dat_mod sdc_dat_mod_u3(
-//		.sd_clk(sdc_clk),
-//		.reset(reset),
-//		.new_dat_set_strb(new_dat_set_strb),// ready to package the command
-//		.tf_data(sm_rd_data), 					// from  
-//		.dat_crc16_out(dat_crc16_out),
-//		.wr_busy(/*wr_busy*/), 					// indicates that the sd card is busy
-//		.D0_in(D0_in), 							// only D0 has a busy signal			 
-//		.D0_out(), 									
-//		.D1_in(D1_in),			  									
-//		.D1_out(D1_out),
-//		.D2_in(D2_in),			 
-//		.D2_out(D2_out),
-//		.D3_in(D3_in),			 
-//		.D3_out(D3_out),		 
-//		.new_rd0_pkt_strb(new_rd0_pkt_strb),
-//		.rd0_pkt(rd0_pkt)
-//	);		 									 
+   );				
 	
+	// This module collects the incoming data from D0 and send it to the data
+	// bram in the host_bus_driver.
+	sdc_single_blk_rd_mod sdc_single_blk_rd_mod_u11(
+		.sdc_clk(sdc_clk),
+		.reset(reset),
+		.d0_in(D0_in),
+		.adma_end(end_descr) ,
+		.wrd_rdy_strb(rcv_wrd_rdy_strb),
+		.tfc(tfc_rd),
+		.crc_rdy_strb(rcv_crc_rdy_strb),
+		.dat_wrd(rcv_dat_wrd),
+		.crc_16(rcv_crc_16)
+	);
+
 	// Parse CRC of DAT0.
 	always@(posedge clk)
 	begin

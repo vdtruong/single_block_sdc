@@ -108,6 +108,13 @@ module sdc_controller_mod(
    wire           snd_cmd13_strb;      // send cmd13 to poll for card ready after a block write
    wire           fin_cmnd_strb;       // finished sending out command, ready to read response
 	
+	// These are for receiving dat from the sd card.  Caution, they use the
+	// slower sdc clock.
+	wire				rcv_wrd_rdy_strb;		// strobe to latch data word into bram from sd card	
+	wire				rcv_crc_rdy_strb;		// strobe to latch crc into bram from sd card after 1 block of data
+	wire	[63:0]	rcv_dat_wrd;			// received word from sd card (64 bits)	
+	wire	[15:0]	rcv_crc_16;				// received crc from sd card for a block of data
+
 	// Initialize sequential logic
 	initial			
 	begin												
@@ -216,8 +223,8 @@ module sdc_controller_mod(
 	// the host controller module.  The host controller
 	// is the physical layer to the sd card.	
   	//defparam sd_host_bus_driver_u1.BRAM_SYSMEM_FILE	= "C:/FPGA_Design/sd_card_controller/src/BRAM_66_x_64.txt";
-  	//defparam sd_host_bus_driver_u1.BRAM_SYSMEM_FILE	= "C:/FPGA_Design/sd_card_controller/src/BRAM_1040_x_64.txt";
-  	defparam sd_host_bus_driver_u1.BRAM_SYSMEM_FILE	= "C:/FPGA_Design/sd_card_controller/src/BRAM_2048_x_64.txt";
+  	defparam sd_host_bus_driver_u1.BRAM_SYSMEM_FILE	= "C:/FPGA_Design/sd_card_controller/src/BRAM_1040_x_64.txt";
+  	//defparam sd_host_bus_driver_u1.BRAM_SYSMEM_FILE	= "C:/FPGA_Design/sd_card_controller/src/BRAM_2048_x_64.txt";
   	defparam sd_host_bus_driver_u1.BRAM_DES_FILE	   = "C:/FPGA_Design/sd_card_controller/src/BRAM_32_x_64.txt";
   	defparam sd_host_bus_driver_u1.SM_MEM_SIZE      = SM_MEM_SIZE;
   	defparam sd_host_bus_driver_u1.SM_ADDR_WD       = SM_ADDR_WD;
@@ -296,8 +303,13 @@ module sdc_controller_mod(
       //.sdc_cmd_indx(sdc_cmd_indx),                 // command index for sdc command format   input      
       .snd_auto_cmd12_strb(snd_auto_cmd12_strb),   //                                        input
       .snd_cmd13_strb(snd_cmd13_strb),             // send out cmd13 to see if card is ready for next block    input
-      .fin_cmnd_strb(fin_cmnd_strb)                // finished sending out cmd13, ready to read response       output
-      //.issue_abort_cmd(issue_abort_cmd)            //                                        input
+      .fin_cmnd_strb(fin_cmnd_strb),               // finished sending out command, ready to read response     output
+		// These are for receiving dat from the sd card.  Caution, they use the
+		// slower sdc clock.
+		.rcv_wrd_rdy_strb(rcv_wrd_rdy_strb),			// strb to latch word from sd card into bram
+		.rcv_crc_rdy_strb(rcv_crc_rdy_strb),			// strb to latch crc to bram
+		.rcv_dat_wrd(rcv_dat_wrd),							// 64 bits word from sd card
+		.rcv_crc_16(rcv_crc_16)								// crc from read from sd card
    );																											
 																												
 	// This module talks physically to the sd card.												
@@ -354,7 +366,13 @@ module sdc_controller_mod(
 		.D3_out(IO_SDC1_D3_out),				      //													            output
 		.SDC_CLK(IO_SDC1_CLK),					      //													            output
 		.cmd_in(IO_SDC1_CMD_in),				      //													            input	
-		.cmd_out(IO_SDC1_CMD_out)				      //													            output
+		.cmd_out(IO_SDC1_CMD_out),				      //													            output
+		// These are for receiving dat from the sd card.  Caution, they use the
+		// slower sdc clock.
+		.rcv_wrd_rdy_strb(rcv_wrd_rdy_strb),		//																	output
+		.rcv_crc_rdy_strb(rcv_crc_rdy_strb),		//																	output
+		.rcv_dat_wrd(rcv_dat_wrd),						//																	output
+		.rcv_crc_16(rcv_crc_16)							//																	output
 	);																										
 																											
 endmodule																								

@@ -37,6 +37,8 @@
 //                02/12/2017
 //                After finishing with all blocks, wait x amount of time before
 //                sending out cmd12.
+//                09/11/2019
+//                Start working on multiple blocks read.
 // Revision 0.01 - File Created
 // Additional Comments: 
 //
@@ -58,8 +60,8 @@ module adma2_fsm(
    input [15:0]   transfer_mode,
    input          fin_cmnd_strb,             // finished sending out cmd13, ready to check response
 	output         snd_auto_cmd12_strb,       // send auto cmd12 to stop multiple blocks transfer
-   input          card_rdy_bit               // this bit holds the card status bit for card ready
-   //output reg		strt_fifo_strb		      // start to save data into the fifo.		
+   input          card_rdy_bit,              // this bit holds the card status bit for card ready
+  	input				tfc_rd							// transfer complete for reading from sd card, 1 block. Careful, uses sdc clock.
 	);	
 												 														   
 	reg	         adma_sar_inc_strb_reg;	// increments adma sys. addr. reg.
@@ -143,7 +145,7 @@ module adma2_fsm(
 	// for the sd host controller memory map												  
 	assign adma_sar_inc_strb	= adma_sar_inc_strb_reg;
     
-	// Parse for desciptor attribute
+	// Parse for descriptor attribute
    always @(posedge clk) begin
       if (reset)
          des_attr <= {6{1'b0}};
@@ -413,7 +415,11 @@ module adma2_fsm(
 					//else if ((des_attr[1]) && (!wr_busy && wr_busy_z1) && transfer_mode[2])
                // Don't go to stop directly.  Need to send auto cmd12 first.
                   //state 					   <= state_auto_cmd12;       
-               else                          
+					else if ((!des_attr[1]) && tfc_rd)	// if end = 0 and tfc = 1, go to read next block.
+                  state 					   <= state_fds; 
+			 		else if ((des_attr[1]) && tfc_rd)	// if end = 1 and tfc = 1, send cmd12 to stop transfer from sd card.
+                  state 					   <= state_auto_cmd12; 
+			 	else                          
                   state 					   <= state_tfr_wt;                          // else wait, may need a timeout here   
                //<outputs> <= <values>;   		  					     
 					//strt_fifo_strb					<= 1'b0;             // from system memory ram	    
