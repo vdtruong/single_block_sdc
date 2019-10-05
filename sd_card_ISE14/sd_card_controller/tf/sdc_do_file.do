@@ -94,11 +94,15 @@ add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_drive
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/str_crc_strb_z1
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/str_crc_strb_z2
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/str_crc_strb_z3
-add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/state
-add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/tf_complete
-add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/datain
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/sm_wr_addr
 add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/sm_rd_addr
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/datain
+# For data_tf_using_adma_u8
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/state
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/tf_complete
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/rd_reg_input
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/normal_int_stat_bit_1
+add wave -position insertpoint sim:/sdc_controller_mod_tb2/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/normal_int_stat_bit_1_z1
 
 #add wave -recursive -depth 3 *
 

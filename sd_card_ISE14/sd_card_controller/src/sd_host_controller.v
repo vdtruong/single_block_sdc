@@ -168,7 +168,7 @@ module sd_host_controller(
 	reg[15:0] transfer_mode;
 	// 2.2.6 Command Register (Offset 00Eh) (pg 40)
    // Whenever you write to this register, you will
-   // generate a send to the sdc.
+   // generate a send to the sdc or a read from the sdc.
 	reg[15:0] command;
 	// 2.2.7 Response Register (Offset 010h)
 	reg[127:0] response;
@@ -441,7 +441,7 @@ module sd_host_controller(
 			12'h008	:	reg_selected <= {{96{1'b0}}, 	argument_1};	
 			12'h00C	:	reg_selected <= {{112{1'b0}}, transfer_mode};
 			12'h00E	:	reg_selected <= {{112{1'b0}}, command};
-			12'h010	:	reg_selected <= response;
+			12'h010	:	reg_selected <= 					response;
 			12'h024	:	reg_selected <= {{96{1'b0}}, 	present_state};
 			12'h02C	:	reg_selected <= {{116{1'b0}}, clock_cntrl};
 			12'h030	:	reg_selected <= {{116{1'b0}}, normal_int_status};
@@ -575,23 +575,22 @@ module sd_host_controller(
 		// to clear this bit.
 		else if (!present_state[2] || !present_state[9])  
 			present_state 		<= present_state & 32'hFFFF_FFFD;
-
 		// DAT Line Active.  Bit 2.
 		// This bit could also be set when we are reading data.
-		// This bit is set after the end bit of the write command. 
-		// But the command has to be the send data command (24d, 18h) or (25d, 19h).
+		// This bit is set after the end bit of the write command (x0E). 
+		// (24d, 18h), (25d, 19h) or single or multiple blks read command.
 		// 18h is block write, 19h is multiple blocks write.
-		// 			Rising Edge 												and read
-		// 			block  or read multiple blocks.
-		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && ((command[13:8] == 6'h18) || (command[13:8] == 6'h19)))	// rising edge 
+		// 			              Rising Edge 												 
+		// 			                                                single block           or    multiple blocks write
+		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && ((command[13:8] == 6'h18) || (command[13:8] == 6'h19)))	 
 			present_state	 	<= present_state | 32'h0000_0004;
 		// Clear it when DAT0 is not busy any more and we have reached the last 
 		// block of data, ie, the last decriptor table.					  
 		// We should also clear this bit if the SD card does not drive the bus signal
 		// for 8 SD clocks.  We could also clear this bit after some time after we
 		// sent the data just so we don't get stuck in this bit.
-		else if (!wr_busy && wr_busy_z1 && end_descr)            // falling edge                        
-			present_state 		<= present_state & 32'hFFFF_FFFB;   
+		//else if (!wr_busy && wr_busy_z1 && end_descr)            // falling edge                        
+		//	present_state 		<= present_state & 32'hFFFF_FFFB;   
 //		// If card is inserted, bit 16                           
 //		else if (card_inserted_strb)                             
 //			present_state		<= present_state | 32'h0001_0000;   
@@ -682,7 +681,7 @@ module sd_host_controller(
 		begin      
 			// We may need to do for all bits of wr_reg_input depending on
 			// which bit we are working with.
-			if (wr_reg_input[0])  // clear bit if 1
+			if (wr_reg_input[0])  		// clear bit if 1
 				normal_int_status <= normal_int_status & 16'hFFFE;	// Command Complete Int
 			else if (wr_reg_input[1])  // clear bit if 1
 				normal_int_status <= normal_int_status & 16'hFFFD; // Transfer Complete
@@ -690,7 +689,7 @@ module sd_host_controller(
 				normal_int_status <= normal_int_status & 16'hFFBF; // Card Inserted Int
 			else if (wr_reg_input[7])  // clear bit if 1
 				normal_int_status <= normal_int_status & 16'hFF7F; // Card Removed Int
-			else  // leave everything as is
+			else  							// leave everything as is
 				normal_int_status <= normal_int_status;
 		end
 		else if (software_reset[1])                              // clear bit if 1 for software reset
@@ -1122,7 +1121,7 @@ module sd_host_controller(
 			new_cmd_set_strb 	<= 1'b0;
 		else if (wr_reg_index == 12'h00E && wr_reg_strb)       
 			new_cmd_set_strb 	<= 1'b1;
-		else  // default case
+		else  // create strobe
 			new_cmd_set_strb 	<= 1'b0;
 	end				 	 
 	
@@ -1384,7 +1383,7 @@ module sd_host_controller(
 		.clk(clk),										                                    //                   input 
 		.reset(reset),																				   //                   input 
       // from data_tf_using_adma_u8 module.                                                           
-		// .strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	                     input 
+		.strt_adma_strb(strt_adma_strb), 		// ready to start the transfer	                     	input 
 		.continue_blk_send(continue_blk_send),												   //                   input 
 		.dat_tf_done(!dat_tf_done_z1 && dat_tf_done),									   //                   input	
 		.wr_busy(wr_busy),														 		         //                   input	
@@ -1400,7 +1399,7 @@ module sd_host_controller(
       .transfer_mode(transfer_mode),                                             //                   input
       .fin_cmnd_strb(fin_cmnd_strb),            // finished sending out cmd13, response is ready      input
       // need to send this command to the host bus driver
-		// .snd_auto_cmd12_strb(snd_auto_cmd12_strb),                                 //                output
+		.snd_auto_cmd12_strb(snd_auto_cmd12_strb),                                 //                	output
       .card_rdy_bit(response[8]),               // this bit holds the card status bit for card ready  input
 		.tfc_rd(tfc_rd)									// reading one block from the sd card is complete		input
 	);	

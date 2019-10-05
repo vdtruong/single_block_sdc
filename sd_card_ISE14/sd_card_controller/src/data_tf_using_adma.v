@@ -33,7 +33,8 @@ module data_tf_using_adma(
 	input 	[35:0] 	date,                // date from puc
 	// data from puc (or other host) per strobe
 	// We'll accept 36 bits of data at a time.
-   // Not using it anywhere.
+   
+	// Not using it anywhere.
 	//input 	[35:0] 	data, 
 	input		[11:0]	tf_blk_size,
 	input		[15:0]	blk_count,
@@ -255,30 +256,7 @@ module data_tf_using_adma(
 //			strt_adma_strb	<= rd_reg_input[8];
 //		else										 						  
 //			strt_adma_strb	<= 1'b0;
-//	end
-	
-	// Update transfer_complete, becareful, other registers are written to 
-	// rd_reg_input.  From normal_int_stat (030h).
-	always@(posedge clk)
-	begin
-		if (reset) 
-			normal_int_stat_bit_1	<= 1'b0;
-		else if (rd_reg_input[1] && (state == ste_wait_for_tf_compl_int_wt))
-			normal_int_stat_bit_1	<= 1'b1;
-		else
-			normal_int_stat_bit_1	<= 1'b0;
-	end     
-	
-	// Update transfer_complete when normal_int_stat_bit_1 has a rising edge. 
-	always@(posedge clk)
-	begin
-		if (reset) 
-			tf_complete	<= 1'b0;
-		else if (~normal_int_stat_bit_1_z1 && normal_int_stat_bit_1)
-			tf_complete	<= 1'b1;
-		else
-			tf_complete	<= 1'b0;
-	end     
+//	end   
 	
 	// Select single block or multiple blocks write base on tf_mode.
 	always@(tf_mode[5])
@@ -480,7 +458,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;      
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_set_argument_1_reg : begin  								   // 24'b0000_0000_0000_0000_1000_0000
+            ste_set_argument_1_reg : begin  								   // 26'b00_0000_0000_0000_0000_1000_0000	x0_000_080
 					state 						<= ste_set_argument_1_reg_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -496,7 +474,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end										  
-            ste_set_argument_1_reg_wt : begin							   // 24'b0000_0000_0000_0001_0000_0000						  								 				  
+            ste_set_argument_1_reg_wt : begin							   // 26'b00_0000_0000_0000_0001_0000_0000	x0_000_100						  								 				  
                if (read_clks_tout)
                   state 					<= ste_set_tf_mode_reg;
                else if (!read_clks_tout)
@@ -517,7 +495,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0; 
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_set_tf_mode_reg : begin									   // 24'b0000_0000_0000_0010_0000_0000
+            ste_set_tf_mode_reg : begin									   // 26'b00_0000_0000_0000_0010_0000_0000	x0_000_200
 					state 						<= ste_set_tf_mode_reg_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -533,7 +511,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0; 
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end										
-            ste_set_tf_mode_reg_wt : begin								   // 24'b0000_0000_0000_0100_0000_0000					  				  				  								 				  
+            ste_set_tf_mode_reg_wt : begin								   // 26'b00_0000_0000_0000_0100_0000_0000	x0_000_400					  				  				  								 				  
                if (read_clks_tout)
                   state 					<= ste_set_cmd_reg;
                else if (!read_clks_tout)
@@ -554,7 +532,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	                     
             end                                                      
-            ste_set_cmd_reg : begin											   // 24'b0000_0000_0000_1000_0000_0000
+            ste_set_cmd_reg : begin											   // 26'b00_0000_0000_0000_1000_0000_0000	x0_000_800
 					state 						<= ste_set_cmd_reg_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -583,7 +561,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end								
-            ste_set_cmd_reg_wt : begin										// 26'b00_0000_0000_0001_0000_0000_0000																		 			  				  				  								 				  
+            ste_set_cmd_reg_wt : begin										// 26'b00_0000_0000_0001_0000_0000_0000	x0_001_000																		 			  				  				  								 				  
                if (read_clks_tout)
                   state 					<= ste_wait_for_cmd_cmplt_int;
                else if (!read_clks_tout)
@@ -604,7 +582,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                       
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_wait_for_cmd_cmplt_int : begin 							// 26'b00_0000_0000_0010_0000_0000_0000
+            ste_wait_for_cmd_cmplt_int : begin 							// 26'b00_0000_0000_0010_0000_0000_0000	x0_002_000
                state 						<= ste_wait_for_cmd_cmplt_int_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -620,7 +598,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                       
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end						
-            ste_wait_for_cmd_cmplt_int_wt : begin						// 26'b00_0000_0000_0100_0000_0000_0000
+            ste_wait_for_cmd_cmplt_int_wt : begin						// 26'b00_0000_0000_0100_0000_0000_0000	x0_004_000
                if (cmd_complete)
                   state 					<= ste_clr_cmd_compl;		  
 					// If time is up and we don't get a command complete
@@ -645,7 +623,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                       
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_clr_cmd_compl : begin 										// 26'b00_0000_0000_1000_0000_0000_0000
+            ste_clr_cmd_compl : begin 										// 26'b00_0000_0000_1000_0000_0000_0000	x0_008_000
 					state 						<= ste_clr_cmd_compl_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -662,7 +640,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end										
-            ste_clr_cmd_compl_wt : begin									// 26'b00_0000_0001_0000_0000_0000_0000;		
+            ste_clr_cmd_compl_wt : begin									// 26'b00_0000_0001_0000_0000_0000_0000;	x0_010_000		
                if (read_clks_tout)
                   state 					<= ste_get_resp;
                else if (!read_clks_tout)
@@ -684,7 +662,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	 
 				end
-            ste_get_resp : begin											// 26'b00_0000_0010_0000_0000_0000_0000
+            ste_get_resp : begin											// 26'b00_0000_0010_0000_0000_0000_0000	x0_020_000
 					state 						<= ste_get_resp_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;
@@ -708,7 +686,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end														 
-            ste_get_resp_wt : begin										// 26'b00_0000_0100_0000_0000_0000_0000		
+            ste_get_resp_wt : begin										// 26'b00_0000_0100_0000_0000_0000_0000	x0_040_000		
 					// If the card is ready for data, start to fill up the
                // fifo.
 					// If the mode is to receive data from the sd card,
@@ -722,7 +700,10 @@ module data_tf_using_adma(
 					// data.
                if (read_clks_tout && rdy_for_dat)
                   state 					<= ste_strt_fifo;
-               else if (!read_clks_tout)
+               else if (read_clks_tout && rdy_for_dat && tf_mode[4])
+						// If we are reading from the card go wait until it is finished.
+                  state 					<= ste_wait_for_tf_compl_int;
+					else if (!read_clks_tout)
                   state 					<= ste_get_resp_wt;		 
 					// If card is not ready for data, quit this process.
                else
@@ -740,8 +721,10 @@ module data_tf_using_adma(
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	
-            end			 
-            ste_strt_fifo : begin										// 26'b00_0000_1000_0000_0000_0000_0000
+            end
+				// Only enter this state if we are sending to the sd card.
+				// We don't need to create a fifo if we are not sending.
+            ste_strt_fifo : begin										// 26'b00_0000_1000_0000_0000_0000_0000	x0_080_000
                // This is where we start to do the transfer.
                // First we fill up the fifo then we start the transfer.
                state 					   <= ste_strt_fifo_wt;										
@@ -759,7 +742,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                       
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_strt_fifo_wt : begin				 		         // 26'b00_0001_0000_0000_0000_0000_0000
+            ste_strt_fifo_wt : begin				 		         // 26'b00_0001_0000_0000_0000_0000_0000	x0_100_000
                if(fifo_rdy_strb)
                   state 				   <= ste_wait_for_tf_compl_int;	
                else                    
@@ -778,7 +761,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                                        
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end	
-            ste_wait_for_tf_compl_int : begin				 		// 26'b00_0010_0000_0000_0000_0000_0000
+            ste_wait_for_tf_compl_int : begin				 		// 26'b00_0010_0000_0000_0000_0000_0000	x0_200_000
                // When the fifo is ready, we start the adma2
                // state machine to send out the data.
                // Also, here we wait for the transfer to complete.
@@ -799,7 +782,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b1;                // starts the adma2 state machine
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end				
-            ste_wait_for_tf_compl_int_wt : begin  					// 26'b00_0100_0000_0000_0000_0000_0000
+            ste_wait_for_tf_compl_int_wt : begin  					// 26'b00_0100_0000_0000_0000_0000_0000	x0_400_000
 					// We stay here until the ADMA2 is completed with all
 					// the block transfers.
                if (tf_complete)
@@ -824,7 +807,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;  
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end
-            ste_clear_tf_compl_int : begin 							// 26'b00_1000_0000_0000_0000_0000_0000
+            ste_clear_tf_compl_int : begin 							// 26'b00_1000_0000_0000_0000_0000_0000	x0_800_000
 					state 						<= ste_clear_tf_compl_int_wt;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;                // 
@@ -842,7 +825,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b1;	
             end				
-            ste_clear_tf_compl_int_wt : begin						// 26'b01_0000_0000_0000_0000_0000_0000	 													 			  				  				  								 				  
+            ste_clear_tf_compl_int_wt : begin						// 26'b01_0000_0000_0000_0000_0000_0000	x1_000_000										 			  				  				  								 				  
                if (read_clks_tout)
                   state 					<= ste_end;
                else if (!read_clks_tout)
@@ -901,6 +884,28 @@ module data_tf_using_adma(
 	////////////////////////////////////////////////////////////////////////////
 	// End of state machine.
 	////////////////////////////////////////////////////////////////////////////
-	             
 	
+	// Update transfer_complete, becareful, other registers are written to 
+	// rd_reg_input.  From normal_int_stat (030h).
+	always@(posedge clk)
+	begin
+		if (reset) 
+			normal_int_stat_bit_1	<= 1'b0;
+		else if (rd_reg_input[1] && (state == ste_wait_for_tf_compl_int_wt))
+			normal_int_stat_bit_1	<= 1'b1;
+		else
+			normal_int_stat_bit_1	<= 1'b0;
+	end               
+	
+	// Update transfer_complete when normal_int_stat_bit_1 has a rising edge. 
+	always@(posedge clk)
+	begin
+		if (reset) 
+			tf_complete	<= 1'b0;
+		else if (~normal_int_stat_bit_1_z1 && normal_int_stat_bit_1)
+			tf_complete	<= 1'b1;
+		else
+			tf_complete	<= 1'b0;
+	end
+
 endmodule
