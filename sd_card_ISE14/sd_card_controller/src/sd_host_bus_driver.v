@@ -1140,7 +1140,7 @@ module sd_host_bus_driver
    );
 	
 	// The two modules below take care of all the communication
-	// with the host controller.  The host controller than
+	// with the host controller.  The host controller then
 	// communicates with the sd card.
 	// For command without data.
 	issue_sd_cmd issue_sd_cmd_u6 (

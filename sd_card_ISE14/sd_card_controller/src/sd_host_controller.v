@@ -501,10 +501,11 @@ module sd_host_controller(
 	// This bit is cleared when the command response is received.
 	// 1 Cannot issue command
 	// 0 Can issue command using only CMD line
-	// Command Inhibit (CMD)
+	
+	// Command Inhibit (CMD) present_state[0]
 	// If this bit is 0, it indicates the CMD line is not in use and the Host 
 	// Controller can issue a SD Command using the CMD line.
-	// This bit is set immediately after the Command register (00Fh) is written. 
+	// This bit is set immediately after the Command register (00Eh) is written. 
 	// This bit is cleared when the command response is received. Auto CMD12 
 	// and Auto CMD23 consist of two responses. In this case, this bit is not 
 	// cleared by the response of CMD12 or CMD23 but cleared by the response of 
@@ -537,11 +538,15 @@ module sd_host_controller(
 	// interrupt in the Normal Interrupt Status register.
 	// Note: The SD Host Driver can save registers in the range of 000-00Dh for 
 	// a suspend transaction after this bit has changed from 1 to 0.
+	//
+	// DAT Line Active, present_state[2] bit.
+	// This bit is set after the end bit of the write command (00Eh).
+	// It is cleared by the last block of the transfer.
 	always@(posedge clk)
 	begin
 		if (reset) 													 
 			present_state		<= {32{1'b0}};													
-		// The Command Inhibit (CMD) bit.  Bit 0.
+		// The Command Inhibit (CMD) bit.  Bit 0. present_state[0].
 		// triggers by the send command		
 		// This bit is set immediately after the Command register (00Eh)
 		// is written.  This bit is cleared when the command response 
@@ -563,25 +568,25 @@ module sd_host_controller(
 		else if ((!new_resp_pkt_strb && new_resp_pkt_strb_z1) ||
 					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1 || software_reset[1])) 
 			present_state 		<= present_state & 32'hFFFF_FFFE;
-		// Command Inhibit (DAT) bit.  Bit 1.
+		// Command Inhibit (DAT) bit.  Bit 1. present_state[1].
 		// need to take care of these two conditions.
 		// This status bit is generated if either the DAT Line Active or
 		// the Read Transfer Active is set to 1.  If this bit is 0, it indicates
 		// the Host Controller can issue the next SD command.  Changing from
 		// 1 to 0 generates a Transfer Complete interrupt in the Normal
 		// Interrupt Sttus register.
-		else if (present_state[2] || present_state[9]) 
-			present_state	 	<= present_state | 32'h0000_0002;
+		//else if (present_state[2] || present_state[9]) 
+		//	present_state	 	<= present_state | 32'h0000_0002;
 		// to clear this bit.
-		else if (!present_state[2] || !present_state[9])  
-			present_state 		<= present_state & 32'hFFFF_FFFD;
-		// DAT Line Active.  Bit 2.
+		//else if (!present_state[2] || !present_state[9])  
+		//	present_state 		<= present_state & 32'hFFFF_FFFD;
+		// DAT Line Active.  Bit 2. present_state[2].
 		// This bit could also be set when we are reading data.
 		// This bit is set after the end bit of the write command (x0E). 
 		// (24d, 18h), (25d, 19h) or single or multiple blks read command.
 		// 18h is block write, 19h is multiple blocks write.
-		// 			              Rising Edge 												 
-		// 			                                                single block           or    multiple blocks write
+		// 			              
+		// 			              Rising Edge                       single block write     or    multiple blocks write
 		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && ((command[13:8] == 6'h18) || (command[13:8] == 6'h19)))	 
 			present_state	 	<= present_state | 32'h0000_0004;
 		// Clear it when DAT0 is not busy any more and we have reached the last 
@@ -589,8 +594,8 @@ module sd_host_controller(
 		// We should also clear this bit if the SD card does not drive the bus signal
 		// for 8 SD clocks.  We could also clear this bit after some time after we
 		// sent the data just so we don't get stuck in this bit.
-		//else if (!wr_busy && wr_busy_z1 && end_descr)            // falling edge                        
-		//	present_state 		<= present_state & 32'hFFFF_FFFB;   
+		else if (!wr_busy && wr_busy_z1 && end_descr)            // falling edge                        
+			present_state 		<= present_state & 32'hFFFF_FFFB;   
 //		// If card is inserted, bit 16                           
 //		else if (card_inserted_strb)                             
 //			present_state		<= present_state | 32'h0001_0000;   

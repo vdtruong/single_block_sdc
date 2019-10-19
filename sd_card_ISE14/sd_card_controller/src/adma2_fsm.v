@@ -419,9 +419,9 @@ module adma2_fsm(
                   state 					   <= state_fds; 
 			 		else if ((des_attr[1]) && tfc_rd)	// if end = 1 and tfc = 1, send cmd12 to stop transfer from sd card.
                   state 					   <= state_auto_cmd12; 
-			 	else                          
-                  state 					   <= state_tfr_wt;                          // else wait, may need a timeout here   
-               //<outputs> <= <values>;   		  					     
+			 		else                          
+               	state 					   <= state_tfr_wt;     	// else wait, may need a timeout here   
+					//<outputs> <= <values>;   		  					     
 					//strt_fifo_strb					<= 1'b0;             // from system memory ram	    
                des_fifo_rd_strb	         <= 1'b0;   
 					adma_sar_inc_strb_reg	   <= 1'b0;		   
