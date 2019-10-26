@@ -56,6 +56,8 @@ module sdc_single_blk_rd_mod(
 	reg	[63:0]	dat_wrd_reg;		// 64 bits data word.  Each register of the PUC.
 	reg	[15:0] 	crc_16_reg;			// 16 bits crc register.
 	reg				crc_rdy_strb_z1;	// delay
+	reg				not_strted;			// flag that we have not started taking data
+	reg				wrd_rdy_strb_z1;	// delay
 
 	wire 	fin_blk_strb;		// Finished with 1 block of data (64 words, 512 bytes).
 	
@@ -66,7 +68,10 @@ module sdc_single_blk_rd_mod(
 		strt_bit_strb		<= 1'b0;
 		strt_bit_strb_z1	<= 1'b0;
 		ie_reg				<= 1'b0;
+		ie_crc_reg			<= 1'b0;
 		tfc_reg				<= 1'b0;
+		not_strted			<= 1'b1;
+		wrd_rdy_strb_z1	<= 1'b0;
 	end
 	
 	// Set up delays.
@@ -76,11 +81,13 @@ module sdc_single_blk_rd_mod(
 			d0_in_z1				<= 1'b0; 
 			strt_bit_strb_z1	<= 1'b0;
 			crc_rdy_strb_z1	<= 1'b0;
+			wrd_rdy_strb_z1	<= 1'b0;
 		end
 		else begin
 			d0_in_z1				<= d0_in; 
 			strt_bit_strb_z1	<= strt_bit_strb;
 			crc_rdy_strb_z1	<= crc_rdy_strb;
+			wrd_rdy_strb_z1	<= wrd_rdy_strb;
 		end
 	end   
 	
@@ -90,9 +97,23 @@ module sdc_single_blk_rd_mod(
 	assign dat_wrd = dat_wrd_reg;
    assign crc_16 = crc_16_reg;
 
-	// Create the start bit strobe.
+	// Create the not_strted flag when data has not come in yet.
+	// If we have a start bit from the sd card, we have started
+	// to collect the data.
 	always @(posedge sdc_clk) begin
-		if (!d0_in && d0_in_z1)		// start bit has been detected from falling edge
+		if (reset)
+			not_strted	<= 1'b1;
+		else if (crc_rdy_strb)		// when crc is done, bring up not_strted flag
+      	not_strted	<= 1'b1;             
+		else if (strt_bit_strb)		// bring down not_strted flag when we have a start bit                         
+         not_strted	<= 1'b0;
+	end
+
+	// Create the start bit strobe but only the first time it happens.
+	always @(posedge sdc_clk) begin
+		if (reset)
+			strt_bit_strb 	<= 1'b0;
+		if (!d0_in && d0_in_z1 && not_strted)		// start bit has been detected from falling edge
       	strt_bit_strb	<= 1'b1;             
 		else                          
          strt_bit_strb	<= 1'b0;
@@ -100,7 +121,7 @@ module sdc_single_blk_rd_mod(
 
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
-	// Need a 64 clocks counter to shift in the data word.
+	// Need a 64 clocks counter to keep track of each (64 bits) word.
 	//-------------------------------------------------------------------------
 	defparam wrd_shift_cntr.dw 	= 8;
 	defparam wrd_shift_cntr.max	= 8'h40;	
@@ -109,7 +130,7 @@ module sdc_single_blk_rd_mod(
 		.clk(sdc_clk), 	 
 		.reset(reset),	
 		.enable(1'b1), 	
-		.start_strb(strt_bit_strb_z1), 	 	
+		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb)), 	 	
 		.cntr(), 
 		.strb(wrd_rdy_strb)            
 	);	 
@@ -118,9 +139,9 @@ module sdc_single_blk_rd_mod(
    always @(posedge sdc_clk) begin
       if (reset)
          ie_reg <= 1'b0;
-      else if (strt_bit_strb_z1)
+      else if (strt_bit_strb)
          ie_reg <= 1'b1;
- 		else if (wrd_rdy_strb)
+ 		else if (fin_blk_strb)
 			ie_reg <= 1'b0;
    end	
       
@@ -201,7 +222,7 @@ module sdc_single_blk_rd_mod(
    
 	(* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
 	SAFE_RECOVERY_STATE="state_stop" *) 
-	reg [14:0] state = state_idle;
+	reg [3:0] state = state_idle;
 
    always@(posedge sdc_clk)
       if (reset) begin
