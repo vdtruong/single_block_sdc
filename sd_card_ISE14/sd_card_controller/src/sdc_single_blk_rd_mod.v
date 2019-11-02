@@ -210,19 +210,21 @@ module sdc_single_blk_rd_mod(
 	end
 
 	// Single block read State Machine
-	// There are four states:
+	// There are five states:
 	// 1. Idle
 	// 2. rd_data
 	// 3. latch_to_bram
 	// 4. rd_crc
-	parameter state_idle 	      = 4'b0001; 	// idle											x1
-   parameter state_rd_dat 			= 4'b0010;	// rd_data										x2
-   parameter state_latch_bram 	= 4'b0100;	// latch single word (64 bits) to bram	x4
-   parameter state_rd_crc 			= 4'b1000;	// rd_crc										x8
-   
+	// 5. latch crc to bram
+	parameter state_idle 	      = 4'b0_0001; 	// idle											x01
+   parameter state_rd_dat 			= 4'b0_0010;	// rd_data										x02
+   parameter state_latch_bram 	= 4'b0_0100;	// latch single word (64 bits) to bram	x04
+   parameter state_rd_crc 			= 5'b0_1000;	// rd_crc										x08
+   parameter state_latch_crc		= 5'b1_0000;	// latch crc to bram							x10
+
 	(* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
 	SAFE_RECOVERY_STATE="state_stop" *) 
-	reg [3:0] state = state_idle;
+	reg [4:0] state = state_idle;
 
    always@(posedge sdc_clk)
       if (reset) begin
@@ -243,38 +245,43 @@ module sdc_single_blk_rd_mod(
 					tfc_reg			   			<= 1'b0;	     
             end                              
             state_rd_dat : begin        	// x0002     
-					if (wrd_rdy_strb) 
+					if (wrd_rdy_strb) 			// Finished with 64 bits word.
 						state 						<= state_latch_bram;
+			 		else if (fin_blk_strb)
+						state							<= state_rd_crc;
 			 		else
 						state							<= state_rd_dat;
                //<outputs> <= <values>;   		  									   
 					tfc_reg			   			<= 1'b0;	     
             end  													
             state_latch_bram : begin		// x0004
-               if (fin_blk_strb)     		// If finished with data block, start to collect the crc.   
-               	state 		        	 	<= state_rd_crc;         
-               else if (!fin_blk_strb)                       
-                  state 				   	<= state_rd_dat;
-			 		else if (crc_rdy_strb_z1)
-						state							<= state_idle;	// done with block of data, including crc
-               else                   
-                  state							<= state_latch_bram; 
+               //if (fin_blk_strb)     		// If finished with data block, start to collect the crc.   
+               //	state 		        	 	<= state_rd_crc;         
+               //else if (!fin_blk_strb)                       
+                 // state 				   	<= state_rd_dat;
+			 		//else                   
+             	state								<= state_rd_dat; 
                //<outputs> <= <values>;	 			
 					tfc_reg			   			<= 1'b0;	                      	
             end
             state_rd_crc : begin    		// x0008
                if (crc_rdy_strb)   			// if done collecting crc   
-                  state 		            <= state_latch_bram;	// latch crc into the bram 
+                  state 		            <= state_latch_crc;	// latch crc into the bram 
                else                    
-                  state 				      <= state_idle;  
+                  state 				      <= state_rd_crc;  
                //<outputs> <= <values>;		 		
+						tfc_reg			   		<= 1'b0;  	  
+            end                           								  
+            state_latch_crc : begin       // x0010     
+					state								<= state_idle;
+               //<outputs> <= <values>;   		  									   
 					// indicates transfer complete as soon as we get into this
 					// state.  The ADMA2 state machine will advance and get back
 					// into this module if we are not done with all the descriptor
 					// tables.
-					tfc_reg			   			<= 1'b1;  	  
-            end                           								  
-            default: begin  					// Fault Recovery
+					tfc_reg			   			<= 1'b1;	     
+            end 
+				default: begin  					// Fault Recovery
                state 						   <= state_idle;   
                //<outputs> <= <values>;   				   
 					tfc_reg			   			<= 1'b0;

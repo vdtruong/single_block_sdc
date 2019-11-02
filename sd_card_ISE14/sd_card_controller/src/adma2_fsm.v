@@ -81,7 +81,8 @@ module adma2_fsm(
    reg            card_rdy_z1;         // card is ready to be written again
    reg            strt_wait_cntr;      // Start the 20 ms wait counter
    reg [3:0]      wait_cnt;            // Counts how many time we wait for 20 ms
-   
+   reg				tfc_rd_z1;				// delay
+
    //wire           rdy_to_chk_strb;     // ready to check for cmd13 response strobe
    wire           timeout_strb;        // timeout strobe waiting for sd card ready response
    wire [27:0]    timeoutCnt;          // time out counts when we start to send out cmd13
@@ -111,7 +112,8 @@ module adma2_fsm(
 		card_rdy	                  <= 1'b0;	
 		card_rdy_z1                <= 1'b0;	
 		strt_wait_cntr             <= 1'b0;	
-		wait_cnt                   <= 4'h0;	
+		wait_cnt                   <= 4'h0;
+		tfc_rd_z1						<= 1'b0;
 	end
 	
 	// Set up delays.
@@ -126,6 +128,7 @@ module adma2_fsm(
          des_fifo_rd_strb_z6	<= 1'b0; 
          wr_busy_z1			   <= 1'b0;		
          card_rdy_z1          <= 1'b0;
+			tfc_rd_z1				<= 1'b0;
 		end
 		else begin
 			des_fifo_rd_strb_z1	<= des_fifo_rd_strb; 
@@ -136,6 +139,7 @@ module adma2_fsm(
 			des_fifo_rd_strb_z6	<= des_fifo_rd_strb_z5; 
          wr_busy_z1			   <= wr_busy;	
          card_rdy_z1          <= card_rdy;
+			tfc_rd_z1				<= tfc_rd;
 		end
 	end   
 	
@@ -381,18 +385,22 @@ module adma2_fsm(
 					// Here we start to send out the data to the sd card.
 					// Or read data from the sd card.  We will only transfer the
 					// data only if the D0 line is not busy.          
-               state 						   <= state_tfr_wt;   
+               state 						   	<= state_tfr_wt;   
                //<outputs> <= <values>;  
-					snd_cmd13_strb				   <= 1'b0; 
-               des_fifo_rd_strb	         <= 1'b0;   
-					adma_sar_inc_strb_reg	   <= 1'b0;		   
-               adma_system_addr_strb	   <= 1'b0;
+					snd_cmd13_strb				   	<= 1'b0; 
+               des_fifo_rd_strb	         	<= 1'b0;   
+					adma_sar_inc_strb_reg	   	<= 1'b0;		   
+               adma_system_addr_strb	   	<= 1'b0;
                // Ready to send out the next block of data.
-               adma2_rdy_to_snd_dat_strb  <= 1'b1;
-               snd_auto_cmd12_strb_reg    <= 1'b0;
-               snd_cmd13_strb	            <= 1'b0;
-               strt_wait_cntr             <= 1'b0;
-               wait_cnt                   <= 4'h0;
+					// If sending data to sd card.
+					if (transfer_mode[4])
+               	adma2_rdy_to_snd_dat_strb  <= 1'b0;	// read from sdc
+               else
+						adma2_rdy_to_snd_dat_strb  <= 1'b1;	// send to sdc
+					snd_auto_cmd12_strb_reg    	<= 1'b0;
+               snd_cmd13_strb	            	<= 1'b0;
+               strt_wait_cntr             	<= 1'b0;
+               wait_cnt                   	<= 4'h0;
             end	                        
             state_tfr_wt : begin				// x0080
                // We will wait here for each block of data to be sent or read.
@@ -415,9 +423,9 @@ module adma2_fsm(
 					//else if ((des_attr[1]) && (!wr_busy && wr_busy_z1) && transfer_mode[2])
                // Don't go to stop directly.  Need to send auto cmd12 first.
                   //state 					   <= state_auto_cmd12;       
-					else if ((!des_attr[1]) && tfc_rd)	// if end = 0 and tfc = 1, go to read next block.
+					else if ((!des_attr[1]) && (!tfc_rd_z1 && tfc_rd))	// if end = 0 and tfc = 1, go to read next block.
                   state 					   <= state_fds; 
-			 		else if ((des_attr[1]) && tfc_rd)	// if end = 1 and tfc = 1, send cmd12 to stop transfer from sd card.
+			 		else if ((des_attr[1]) && (!tfc_rd_z1 && tfc_rd))	// if end = 1 and tfc = 1, send cmd12 to stop transfer from sd card.
                   state 					   <= state_auto_cmd12; 
 			 		else                          
                	state 					   <= state_tfr_wt;     	// else wait, may need a timeout here   
