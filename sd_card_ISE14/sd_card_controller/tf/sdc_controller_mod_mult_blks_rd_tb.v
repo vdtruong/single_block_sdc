@@ -1187,9 +1187,74 @@ module sdc_controller_mod_multi_blks_rd_tb;
 					#640 IO_SDC1_D0_in = 1'b1;	// stop bit
 				end
 			end
+			// 16 bits CRC after every block.
+			IO_SDC1_D0_in = 16'hAC1E;
 			#200000; // wait before starting another block, 200 us
  		end
-	
+
+		// After 47 ms, send the cmd12 response.
+		// Response from SD Card for CMD12. x0c
+		//-------------------------------------  
+		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// c	cmd12 in hex x0c
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
 	end	// end of intial loop
       
 endmodule

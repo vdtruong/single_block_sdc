@@ -40,7 +40,7 @@ module sdc_single_blk_rd_mod(
    input 				reset,
 	input					d0_in,			// sd card data line
 	input 				adma_end,		// indicates if we are done with the transfer from ADMA2.		 	
-	output				wrd_rdy_strb,	// ready to latch 64 bits word into bram.
+	output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
 	output				tfc,				// transfer of one block is complete
 	output 				crc_rdy_strb,	// Finished capturing crc, latch into bram.
 	output	[63:0]	dat_wrd,			// 64 bits data word.  Each register of the PUC.
@@ -60,7 +60,8 @@ module sdc_single_blk_rd_mod(
 	reg				wrd_rdy_strb_z1;	// delay
 
 	wire 	fin_blk_strb;		// Finished with 1 block of data (64 words, 512 bytes).
-	
+	wire	[7:0] 	wrd_cnt;	// Counts how many words have been collected from sd card.
+
 	// Initialize sequential logic
    initial			
 	begin								
@@ -72,6 +73,7 @@ module sdc_single_blk_rd_mod(
 		tfc_reg				<= 1'b0;
 		not_strted			<= 1'b1;
 		wrd_rdy_strb_z1	<= 1'b0;
+		latch_wrd_strb		<= 1'b0;
 	end
 	
 	// Set up delays.
@@ -104,8 +106,8 @@ module sdc_single_blk_rd_mod(
 		if (reset)
 			not_strted	<= 1'b1;
 		else if (crc_rdy_strb)		// when crc is done, bring up not_strted flag
-      	not_strted	<= 1'b1;             
-		else if (strt_bit_strb)		// bring down not_strted flag when we have a start bit                         
+      	not_strted	<= 1'b1;              
+ 		else if (strt_bit_strb)		// bring down not_strted flag when we have a start bit                         
          not_strted	<= 1'b0;
 	end
 
@@ -119,6 +121,16 @@ module sdc_single_blk_rd_mod(
          strt_bit_strb	<= 1'b0;
 	end
 
+	// Strobe the bram fifo when wrd_rdy_strb && !not_strted.
+	always @(posedge sdc_clk) begin
+		if (reset)
+			latch_wrd_strb <= 1'b0;
+		if (wrd_rdy_strb && !not_strted)		
+      	latch_wrd_strb	<= 1'b1;             
+		else                          
+         latch_wrd_strb	<= 1'b0;
+	end
+
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
 	// Need a 64 clocks counter to keep track of each (64 bits) word.
@@ -130,7 +142,7 @@ module sdc_single_blk_rd_mod(
 		.clk(sdc_clk), 	 
 		.reset(reset),	
 		.enable(1'b1), 	
-		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb)), 	 	
+		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb && (wrd_cnt < 8'h3f) )), 	 	
 		.cntr(), 
 		.strb(wrd_rdy_strb)            
 	);	 
@@ -168,7 +180,7 @@ module sdc_single_blk_rd_mod(
 		.clk(sdc_clk), 		 
 		.reset(reset),	 
 		.enable(wrd_rdy_strb),   	 	
-		.cntr(), 
+		.cntr(wrd_cnt), 
 		.strb(fin_blk_strb) 
 	);	
   
@@ -237,7 +249,7 @@ module sdc_single_blk_rd_mod(
             state_idle : begin				// x0001
                // start bit has been detected from falling edge of d0_in
 					// Also, the "end" desciptor parameter is not set.
-					if (strt_bit_strb && !adma_end)	
+					if (strt_bit_strb /*&& !adma_end*/)	
 						state 					   <= state_rd_dat;             
                else                          
                   state 					   <= state_idle;   

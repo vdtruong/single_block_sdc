@@ -256,7 +256,7 @@ module adma2_fsm(
    parameter state_auto_cmd12_wt = 15'b_0000_0010_0000_0000;	// send auto cmd12 wait						x0200
    parameter state_qry_stat      = 15'b_0000_0100_0000_0000;	// send cmd13 to poll for card ready	x0400
    parameter state_chk_stat      = 15'b_0000_1000_0000_0000;	// wait for cm13 response					x0800
-   parameter state_pre_wait      = 15'b_0001_0000_0000_0000;	// start the wait countr strobe			x1000
+   parameter state_pre_wait      = 15'b_0001_0000_0000_0000;	// start the wait counter strobe			x1000
    parameter state_wait_20ms     = 15'b_0010_0000_0000_0000;	// wait for 20 ms								x2000
    parameter state_chk_busy      = 15'b_0100_0000_0000_0000;	// check D0 line for busy					x4000
 
@@ -440,7 +440,35 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
             end
-            state_qry_stat : begin   		// x0100
+            state_auto_cmd12 : begin   	// x0100
+					// Send out cmd12 when finished with multiple send blocks          
+               state 						   <= state_auto_cmd12_wt;   
+               //<outputs> <= <values>;  
+					//strt_fifo_strb				   <= 1'b1; // from system memory ram
+               des_fifo_rd_strb	         <= 1'b0;   
+					adma_sar_inc_strb_reg	   <= 1'b0;		   
+               adma_system_addr_strb	   <= 1'b0;
+               // Ready to send out the next block of data.
+               adma2_rdy_to_snd_dat_strb  <= 1'b0;
+               snd_auto_cmd12_strb_reg    <= 1'b1;
+               snd_cmd13_strb	            <= 1'b0;
+               strt_wait_cntr             <= 1'b0;
+               wait_cnt                   <= 4'h0;
+            end										  
+            state_auto_cmd12_wt : begin 	// x0200            
+               state 						   <= state_stop;   
+               //<outputs> <= <values>;  
+					//strt_fifo_strb				   <= 1'b1; // from system memory ram
+               des_fifo_rd_strb	         <= 1'b0;   
+					adma_sar_inc_strb_reg	   <= 1'b0;		   
+               adma_system_addr_strb	   <= 1'b0;
+               // Ready to send out the next block of data.
+               adma2_rdy_to_snd_dat_strb  <= 1'b0;
+               snd_auto_cmd12_strb_reg    <= 1'b0;
+               snd_cmd13_strb	            <= 1'b0;
+               strt_wait_cntr             <= 1'b0;
+               wait_cnt                   <= 4'h0;
+            end	state_qry_stat : begin  // x0400
 					// Send out cmd13 to see if card is ready for next data.          
                state 						   <= state_chk_stat;   
                //<outputs> <= <values>;   
@@ -453,7 +481,7 @@ module adma2_fsm(
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
                end
-            state_chk_stat : begin   		// x0200
+            state_chk_stat : begin   		// x0800
 					// Stay here and wait for ready from sd card.
                // If response is not ready and we have not time out,
                // resend cmd13.  If time has ran out and the card
@@ -477,36 +505,7 @@ module adma2_fsm(
                snd_cmd13_strb	            <= 1'b0;
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
-            end										  
-            state_auto_cmd12 : begin   	// x0400
-					// Send out cmd12 when finished with multiple send blocks          
-               state 						   <= state_auto_cmd12_wt;   
-               //<outputs> <= <values>;  
-					//strt_fifo_strb				   <= 1'b1; // from system memory ram
-               des_fifo_rd_strb	         <= 1'b0;   
-					adma_sar_inc_strb_reg	   <= 1'b0;		   
-               adma_system_addr_strb	   <= 1'b0;
-               // Ready to send out the next block of data.
-               adma2_rdy_to_snd_dat_strb  <= 1'b0;
-               snd_auto_cmd12_strb_reg    <= 1'b1;
-               snd_cmd13_strb	            <= 1'b0;
-               strt_wait_cntr             <= 1'b0;
-               wait_cnt                   <= 4'h0;
-            end										  
-            state_auto_cmd12_wt : begin 	// x0800            
-               state 						   <= state_stop;   
-               //<outputs> <= <values>;  
-					//strt_fifo_strb				   <= 1'b1; // from system memory ram
-               des_fifo_rd_strb	         <= 1'b0;   
-					adma_sar_inc_strb_reg	   <= 1'b0;		   
-               adma_system_addr_strb	   <= 1'b0;
-               // Ready to send out the next block of data.
-               adma2_rdy_to_snd_dat_strb  <= 1'b0;
-               snd_auto_cmd12_strb_reg    <= 1'b0;
-               snd_cmd13_strb	            <= 1'b0;
-               strt_wait_cntr             <= 1'b0;
-               wait_cnt                   <= 4'h0;
-            end										  
+            end										  									  
             state_pre_wait : begin   		// x1000          
                state 						   <= state_wait_20ms;   
                //<outputs> <= <values>;  
