@@ -11,7 +11,7 @@
 // Tool versions: 
 // Description: 	This modules reads in one block of data from the sd
 // 					card.  
-// 					It has 4 states all together.
+// 					It has 5 states all together.
 // 					1. State Idle.
 // 					2. State Collect data.  This state collects the bits coming
 // 					over from the SD card.  It will collect 64 bits of data for
@@ -25,7 +25,7 @@
 // 					machine that the data transfer is complete.
 // 					4. State Collect CRC.  This state will collect the CRC at
 // 					the end of a block of data.  It will then go to state 3.
-//
+//						5. Latch crc into bram.	
 //
 // Dependencies: 	
 //
@@ -38,11 +38,12 @@
 module sdc_single_blk_rd_mod(
    input					sdc_clk,			// sd card clock, much slower than fsys clock.		
    input 				reset,
+	input		[15:0]	command,			// Only starts this state machine if the command is a read command.
 	input					d0_in,			// sd card data line
 	input 				adma_end,		// indicates if we are done with the transfer from ADMA2.		 	
 	output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
 	output				tfc,				// transfer of one block is complete
-	output 				crc_rdy_strb,	// Finished capturing crc, latch into bram.
+	output reg			latch_crc_strb,// Finished capturing crc, latch into bram.
 	output	[63:0]	dat_wrd,			// 64 bits data word.  Each register of the PUC.
 	output	[15:0] 	crc_16			// 16 bits crc register.
 );	
@@ -74,6 +75,7 @@ module sdc_single_blk_rd_mod(
 		not_strted			<= 1'b1;
 		wrd_rdy_strb_z1	<= 1'b0;
 		latch_wrd_strb		<= 1'b0;
+		latch_crc_strb		<= 1'b0;
 	end
 	
 	// Set up delays.
@@ -121,28 +123,39 @@ module sdc_single_blk_rd_mod(
          strt_bit_strb	<= 1'b0;
 	end
 
-	// Strobe the bram fifo when wrd_rdy_strb && !not_strted.
+	// Strobe the bram fifo when wrd_rdy_strb && !not_strted and read commands
+	// only.
 	always @(posedge sdc_clk) begin
 		if (reset)
 			latch_wrd_strb <= 1'b0;
-		if (wrd_rdy_strb && !not_strted)		
+		if ((wrd_rdy_strb && !not_strted) && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
       	latch_wrd_strb	<= 1'b1;             
 		else                          
          latch_wrd_strb	<= 1'b0;
+	end
+
+	// Strobe the bram fifo when crc_rdy_strb and read commands only.
+	always @(posedge sdc_clk) begin
+		if (reset)
+			latch_crc_strb <= 1'b0;
+		if (crc_rdy_strb && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
+      	latch_crc_strb	<= 1'b1;             
+		else                          
+         latch_crc_strb	<= 1'b0;
 	end
 
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
 	// Need a 64 clocks counter to keep track of each (64 bits) word.
 	//-------------------------------------------------------------------------
-	defparam wrd_shift_cntr.dw 	= 8;
-	defparam wrd_shift_cntr.max	= 8'h40;	
+	defparam bit_shift_cntr.dw 	= 6;
+	defparam bit_shift_cntr.max	= 6'h3F;	
 	//-------------------------------------------------------------------------
-	CounterSeq wrd_shift_cntr(
+	CounterSeq bit_shift_cntr(
 		.clk(sdc_clk), 	 
 		.reset(reset),	
 		.enable(1'b1), 	
-		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb && (wrd_cnt < 8'h3f) )), 	 	
+		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb && (wrd_cnt < 6'h3f) )), 	 	
 		.cntr(), 
 		.strb(wrd_rdy_strb)            
 	);	 
@@ -228,9 +241,9 @@ module sdc_single_blk_rd_mod(
 	// 3. latch_to_bram
 	// 4. rd_crc
 	// 5. latch crc to bram
-	parameter state_idle 	      = 4'b0_0001; 	// idle											x01
-   parameter state_rd_dat 			= 4'b0_0010;	// rd_data										x02
-   parameter state_latch_bram 	= 4'b0_0100;	// latch single word (64 bits) to bram	x04
+	parameter state_idle 	      = 5'b0_0001; 	// idle											x01
+   parameter state_rd_dat 			= 5'b0_0010;	// rd_data										x02
+   parameter state_latch_bram 	= 5'b0_0100;	// latch single word (64 bits) to bram	x04
    parameter state_rd_crc 			= 5'b0_1000;	// rd_crc										x08
    parameter state_latch_crc		= 5'b1_0000;	// latch crc to bram							x10
 
@@ -249,7 +262,7 @@ module sdc_single_blk_rd_mod(
             state_idle : begin				// x0001
                // start bit has been detected from falling edge of d0_in
 					// Also, the "end" desciptor parameter is not set.
-					if (strt_bit_strb /*&& !adma_end*/)	
+					if (strt_bit_strb && (command[13:8] == 6'h11 || command[13:8] == 6'h12) /*&& !adma_end*/)	
 						state 					   <= state_rd_dat;             
                else                          
                   state 					   <= state_idle;   

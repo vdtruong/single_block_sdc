@@ -1447,15 +1447,16 @@ module sd_host_controller(
 	// This module collects the incoming data from D0 and send it to the data
 	// bram in the host_bus_driver.
 	sdc_single_blk_rd_mod sdc_single_blk_rd_mod_u11(
-		.sdc_clk(sdc_clk),
-		.reset(reset),
-		.d0_in(D0_in),
-		.adma_end(end_descr) ,
+		.sdc_clk(sdc_clk),						// input
+		.reset(reset),								// input
+		.command(command),						// input
+		.d0_in(D0_in),								// input
+		.adma_end(end_descr) ,					// input
 		.latch_wrd_strb(rcv_wrd_rdy_strb),	// output
-		.tfc(tfc_rd),
-		.crc_rdy_strb(rcv_crc_rdy_strb),
-		.dat_wrd(rcv_dat_wrd),
-		.crc_16(rcv_crc_16)
+		.tfc(tfc_rd),								// output
+		.latch_crc_strb(rcv_crc_rdy_strb),	// output
+		.dat_wrd(rcv_dat_wrd),					// output
+		.crc_16(rcv_crc_16)						// output
 	);
 
 	// Parse CRC of DAT0.

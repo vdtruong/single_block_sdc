@@ -709,7 +709,8 @@ module data_tf_using_adma(
                   state 					<= ste_strt_fifo;
                else if (read_clks_tout && rdy_for_dat && tf_mode[4])
 						// If we are reading from the card go wait until it is finished.
-                  state 					<= ste_wait_for_tf_compl_int;
+               	// Jump to state x0_200_000 if read from sd card.
+   					state 					<= ste_wait_for_tf_compl_int;	
 					else if (!read_clks_tout)
                   state 					<= ste_get_resp_wt;		 
 					// If card is not ready for data, quit this process.

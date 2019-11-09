@@ -63,7 +63,7 @@ module sdc_controller_mod_tb2;
    integer incr;
    parameter WIDTH=64;
    reg [WIDTH-1:0] DATA;
-   integer i;
+   integer i, j;
 
 	// Instantiate the Unit Under Test (UUT)
 	sdc_controller_mod uut (
@@ -5364,6 +5364,74 @@ module sdc_controller_mod_tb2;
 		#640		   IO_SDC1_CMD_in		= 1'b1;	//       0
 		// End of writing multiple blocks section.
 		//      //////////////////////////////////////
+		
+		// Start to send the data to the sd card.
+		#200000	start_data_tf_strb	= 1'b1;	
+					sdc_wr_addr				= 32'h00808000;	// sd card write location				 
+		#20		start_data_tf_strb	= 1'b0;	
+		// Response from SD Card for CMD25.
+		//-------------------------------------  
+		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 1
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 8
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 6
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+
+		////////////////////////////////////////
 		//      Now we read multiple blocks.
 		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
 		#20000		tf_mode		      = 36'h0000C0035;	
@@ -5378,11 +5446,100 @@ module sdc_controller_mod_tb2;
 		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b1; 	//	1 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 2	cmd18 in hex x12
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 6
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
 		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
 		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
+		// Wait a while before starting to send back data.
+		#5_000_000;
+		// Data returning from sdc at 1.56 MHz rate.
+		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
+			// This is for 1 block of data, 512 bytes.
+			for (i=0; i<=4114; i=i+1) begin
+				if (i == 0) begin
+					#640 IO_SDC1_D0_in = 1'b0; // start bit
+ 				end
+				else if (i>0 && i<4113) begin
+					if (i & 1) begin	// If number is odd.
+						#640 IO_SDC1_D0_in = 1'b1;
+	 				end
+					else begin
+						#640 IO_SDC1_D0_in = 1'b0;
+	 				end
+				end
+				else if (i == 4113) begin
+					#640 IO_SDC1_D0_in = 1'b1;	// stop bit
+				end
+			end
+			// 16 bits CRC after every block.
+			IO_SDC1_D0_in = 16'hAC1E;
+			#200000; // wait before starting another block, 200 us
+ 		end
+
+		// After 47 ms, send the cmd12 response.
+		// Response from SD Card for CMD12. x0c
+		//-------------------------------------  
+		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// c	cmd12 in hex x0c
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		//-------------------------------------
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
@@ -5434,1550 +5591,8 @@ module sdc_controller_mod_tb2;
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
-		//-------------------------------------	
-	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-		//-------------------------------------
-		// Busy signal from sd card while it saves the data.
-		// The card pulls down the D0 low to indicate it is busy.
-      // This is for the second block of data.
-		//-------------------------------------  
-//		#3200000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-////		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//      #640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//      #640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//      #640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------		
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the third block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      ////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------		
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the fourth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-////		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the fifth block of data.
-////		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-////      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------		
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the fifth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the sixth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the seventh block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-////      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the eight block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      ////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------		
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the ninth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------		
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the tenth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      ////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the eleventh block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------		
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the twelveth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the thirteenth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      ////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the fourteenth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      ////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the fifteenth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-//		//-------------------------------------			
-////		//-------------------------------------	
-//		//-------------------------------------
-//		// Busy signal from sd card while it saves the data.
-//		// The card pulls down the D0 low to indicate it is busy.
-//      // This is for the sixteenth block of data.
-//		//-------------------------------------  
-//		#2700000	IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//   
-//		//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		//-------------------------------------  
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//  	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 	
-//		#640		IO_SDC1_D0_in		= 1'b0; 	// 
-//		// Response from SD Card for CMD13.
-//      // This is when we poll the card to see
-//      // if it is ready for the next block of data.
-//		//-------------------------------------  
-//		#150000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// third		
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// fourth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// fifth		D
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// sixth
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// seventh
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       22 14
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       21 13
-//		//-------------------------------------      20 12
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       19 11
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	1  18 10
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	   17 9
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       16 8  ready for data
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       15 7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	   14 6
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	a  13 5
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       12 4
-//		//-------------------------------------   
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       11 3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       10 2
-//		#640		IO_SDC1_CMD_in		= 1'b1;	// 	a  9  1
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       8  0
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	//       7
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	crc starts here
-//		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1  5
-//		#640		IO_SDC1_CMD_in		= 1'b1; 	//       4  
-//		//-------------------------------------
-//		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3  3
-//		#640		IO_SDC1_CMD_in		= 1'b0;	//       2  
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       1
-//		#640		IO_SDC1_CMD_in		= 1'b1;	//       0
-//      //////////////////////////////////////
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b0; 	//
-//		#640		IO_SDC1_D0_in		= 1'b1; 	//       sc card release busy line
-		//-------------------------------------			
-//		//-------------------------------------								
+		//-------------------------------------							
+				
 	end
       
 endmodule
