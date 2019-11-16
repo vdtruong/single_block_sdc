@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 	PolySoftique Inc.
@@ -2097,11 +2097,11 @@ module sdc_controller_mod_tb2;
 		//-------------------------------------
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
 		//-------------------------------------
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	//	6 	
 		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
 		//-------------------------------------
@@ -5303,12 +5303,12 @@ module sdc_controller_mod_tb2;
       // Wait for x amount of time after sending the
       // blocks of data, then send out cmd12.
 		//-------------------------------------  
-		#20000000	IO_SDC1_CMD_in		= 1'b0; 	// first bit of response
+		#1000000		IO_SDC1_CMD_in		= 1'b0; 	// first bit of response, 1 ms after sending cmd12
 		#640		   IO_SDC1_CMD_in		= 1'b0; 	// second bit of response	
 		#640		   IO_SDC1_CMD_in		= 1'b0; 	// third		
 		#640		   IO_SDC1_CMD_in		= 1'b0; 	// fourth
 		//-------------------------------------
-		#640		   IO_SDC1_CMD_in		= 1'b1;	// fifth		D
+		#640		   IO_SDC1_CMD_in		= 1'b1;	// fifth		x0C
 		#640		   IO_SDC1_CMD_in		= 1'b1;	// sixth
 		#640		   IO_SDC1_CMD_in		= 1'b0;	// seventh
 		#640		   IO_SDC1_CMD_in		= 1'b0;	// eigth
@@ -5366,7 +5366,7 @@ module sdc_controller_mod_tb2;
 		//      //////////////////////////////////////
 		
 		// Start to send the data to the sd card.
-		#200000	start_data_tf_strb	= 1'b1;	
+		/*#200000	start_data_tf_strb	= 1'b1;	
 					sdc_wr_addr				= 32'h00808000;	// sd card write location				 
 		#20		start_data_tf_strb	= 1'b0;	
 		// Response from SD Card for CMD25.
@@ -5430,7 +5430,7 @@ module sdc_controller_mod_tb2;
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
-
+*/
 		////////////////////////////////////////
 		//      Now we read multiple blocks.
 		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
@@ -5478,18 +5478,18 @@ module sdc_controller_mod_tb2;
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
 		//-------------------------------------
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 0
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 0
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
-		//-------------------------------------
-		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
-		#640		IO_SDC1_CMD_in		= 1'b1; 	// 6
-		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
-		//-------------------------------------
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 
-		#640		IO_SDC1_CMD_in		= 1'b0;	// 1
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 9
 		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
 		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
 		//-------------------------------------
@@ -5504,7 +5504,7 @@ module sdc_controller_mod_tb2;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
 		// Wait a while before starting to send back data.
-		#5_000_000;
+		#50_000_000;
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
 			// This is for 1 block of data, 512 bytes.
