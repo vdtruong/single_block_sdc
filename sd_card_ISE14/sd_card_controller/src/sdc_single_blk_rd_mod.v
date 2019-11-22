@@ -41,7 +41,8 @@ module sdc_single_blk_rd_mod(
 	input		[15:0]	command,			// Only starts this state machine if the command is a read command.
 	input					d0_in,			// sd card data line
 	input 				adma_end,		// indicates if we are done with the transfer from ADMA2.		 	
-	output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
+	//output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
+	output				latch_wrd_strb,
 	output				tfc,				// transfer of one block is complete
 	output reg			latch_crc_strb,// Finished capturing crc, latch into bram.
 	output	[63:0]	dat_wrd,			// 64 bits data word.  Each register of the PUC.
@@ -59,9 +60,12 @@ module sdc_single_blk_rd_mod(
 	reg				crc_rdy_strb_z1;	// delay
 	reg				not_strted;			// flag that we have not started taking data
 	reg				wrd_rdy_strb_z1;	// delay
+	reg				fin_blk_strb_z1;	// delay
 
-	wire 	fin_blk_strb;		// Finished with 1 block of data (64 words, 512 bytes).
-	wire	[7:0] 	wrd_cnt;	// Counts how many words have been collected from sd card.
+	wire 				fin_blk_strb;		// Finished with 1 block of data (64 words, 512 bytes).
+	wire	[7:0] 	wrd_cnt;				// Counts how many words have been collected from sd card.
+	wire	[4:0]		crc_shift_cnt;		// bit count for crc shift
+	wire				wrd_rdy_strb;		// 64 bits for each word are collected
 
 	// Initialize sequential logic
    initial			
@@ -74,8 +78,9 @@ module sdc_single_blk_rd_mod(
 		tfc_reg				<= 1'b0;
 		not_strted			<= 1'b1;
 		wrd_rdy_strb_z1	<= 1'b0;
-		latch_wrd_strb		<= 1'b0;
+		//latch_wrd_strb		<= 1'b0;
 		latch_crc_strb		<= 1'b0;
+		fin_blk_strb_z1	<= 1'b0;
 	end
 	
 	// Set up delays.
@@ -86,12 +91,14 @@ module sdc_single_blk_rd_mod(
 			strt_bit_strb_z1	<= 1'b0;
 			crc_rdy_strb_z1	<= 1'b0;
 			wrd_rdy_strb_z1	<= 1'b0;
+			fin_blk_strb_z1	<= 1'b0;
 		end
 		else begin
 			d0_in_z1				<= d0_in; 
 			strt_bit_strb_z1	<= strt_bit_strb;
 			crc_rdy_strb_z1	<= crc_rdy_strb;
 			wrd_rdy_strb_z1	<= wrd_rdy_strb;
+			fin_blk_strb_z1	<= fin_blk_strb;
 		end
 	end   
 	
@@ -100,6 +107,7 @@ module sdc_single_blk_rd_mod(
 	// for data bram
 	assign dat_wrd = dat_wrd_reg;
    assign crc_16 = crc_16_reg;
+	assign latch_wrd_strb = wrd_rdy_strb_z1 && !not_strted;
 
 	// Create the not_strted flag when data has not come in yet.
 	// If we have a start bit from the sd card, we have started
@@ -125,14 +133,14 @@ module sdc_single_blk_rd_mod(
 
 	// Strobe the bram fifo when wrd_rdy_strb && !not_strted and read commands
 	// only.
-	always @(posedge sdc_clk) begin
-		if (reset)
-			latch_wrd_strb <= 1'b0;
-		if ((wrd_rdy_strb && !not_strted) && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
-      	latch_wrd_strb	<= 1'b1;             
-		else                          
-         latch_wrd_strb	<= 1'b0;
-	end
+	//always @(posedge sdc_clk) begin
+	//	if (reset)
+	//		latch_wrd_strb <= 1'b0;
+	//	if ((wrd_rdy_strb && !not_strted) && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
+     // 	latch_wrd_strb	<= 1'b1;             
+	//	else                          
+     //    latch_wrd_strb	<= 1'b0;
+	//end
 
 	// Strobe the bram fifo when crc_rdy_strb and read commands only.
 	always @(posedge sdc_clk) begin
@@ -149,13 +157,13 @@ module sdc_single_blk_rd_mod(
 	// Need a 64 clocks counter to keep track of each (64 bits) word.
 	//-------------------------------------------------------------------------
 	defparam bit_shift_cntr.dw 	= 6;
-	defparam bit_shift_cntr.max	= 6'h3F;	
+	defparam bit_shift_cntr.max	= 6'h3E; //6'h3F;	
 	//-------------------------------------------------------------------------
 	CounterSeq bit_shift_cntr(
 		.clk(sdc_clk), 	 
 		.reset(reset),	
 		.enable(1'b1), 	
-		.start_strb(strt_bit_strb_z1 | (~not_strted && wrd_rdy_strb && (wrd_cnt < 6'h3f) )), 	 	
+		.start_strb(strt_bit_strb | (~not_strted && wrd_rdy_strb && (wrd_cnt < 6'h3f))), 	 	
 		.cntr(), 
 		.strb(wrd_rdy_strb)            
 	);	 
@@ -187,7 +195,7 @@ module sdc_single_blk_rd_mod(
 	//-------------------------------------------------------------------------
 	defparam wrd_cntr.dw 	= 8;
 	// Count up to this number, starting at zero.
-	defparam wrd_cntr.max	= 8'h40;	
+	defparam wrd_cntr.max	= 8'h40; //8'h3F; //8'h40;	
 	//-------------------------------------------------------------------------
 	Counter wrd_cntr(
 		.clk(sdc_clk), 		 
@@ -208,8 +216,8 @@ module sdc_single_blk_rd_mod(
 		.clk(sdc_clk), 	 
 		.reset(reset),	
 		.enable(1'b1), 	
-		.start_strb(fin_blk_strb), 	 	
-		.cntr(), 
+		.start_strb(/*fin_blk_strb*/wrd_rdy_strb_z1 && wrd_cnt == 8'h40), 	 	
+		.cntr(crc_shift_cnt), 
 		.strb(crc_rdy_strb)            
 	);	 
  
@@ -217,7 +225,7 @@ module sdc_single_blk_rd_mod(
    always @(posedge sdc_clk) begin
       if (reset)
          ie_crc_reg <= 1'b0;
-      else if (fin_blk_strb)
+      else if (fin_blk_strb && !fin_blk_strb_z1)	// rising edge
          ie_crc_reg <= 1'b1;
  		else if (crc_rdy_strb)
 			ie_crc_reg <= 1'b0;

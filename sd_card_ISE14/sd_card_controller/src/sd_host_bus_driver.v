@@ -238,7 +238,9 @@ module sd_host_bus_driver
 	reg 				rcv_wrd_strb;
 	reg 				rcv_crc_strb;
 	reg 				rcv_wrd_strb_z1;				// delay
+	reg				rcv_wrd_strb_z2;				// delay
 	reg 				rcv_crc_strb_z1;				// delay
+	reg				rcv_crc_strb_z2;				// delay
 	reg				rcv_wrd_rdy_strb_z1;			// delay
 	reg				rcv_crc_rdy_strb_z1;			// delay
 
@@ -452,6 +454,8 @@ module sd_host_bus_driver
 		rcv_crc_strb					<= 1'b0;
 		rcv_wrd_strb_z1				<= 1'b0;
 		rcv_crc_strb_z1				<= 1'b0;
+		rcv_wrd_strb_z2				<= 1'b0;
+		rcv_crc_strb_z2				<= 1'b0;
 		rcv_wrd_rdy_strb_z1			<= 1'b0;
 		rcv_crc_rdy_strb_z1			<= 1'b0;
 	end
@@ -1414,7 +1418,7 @@ module sd_host_bus_driver
       // Only strobe when we are still updating the block ram.
       // After we have 16 blocks, stop.
       .wr_b((!stop_recv_pkt && (wr_b_strb_z2 || str_crc_strb_z2)) |
-					rcv_wrd_strb_z1 | rcv_crc_strb_z1),						//	input                            
+					rcv_wrd_strb_z2 | rcv_crc_strb_z2),						//	input                            
       .datain_b(datain), 							                     // input                            
       .dataout_a(sm_rd_data),						                     // output                           
       .dataout_b()									                     // output                           
