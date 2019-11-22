@@ -1172,13 +1172,15 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
 			// This is for 1 block of data, 512 bytes.
-			for (i=0; i<=4114; i=i+1) begin
+			// Each word of data is 2 clocks late.
+			// Therefore, we add 2*64 bits to the count.
+			for (i=0; i<4204; i=i+1) begin
 				// Start bit.
 				if (i == 0) begin
 					#640 IO_SDC1_D0_in = 1'b0; 
  				end
 				// Start of data block.
-				else if (i>0 && i<4096) begin 
+				else if (i>0 && i<4098) begin 
 					if (i & 1) begin	// If number is odd.
 						#640 IO_SDC1_D0_in = 1'b1;
 	 				end
@@ -1188,14 +1190,14 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		 		end						
 				// end of 1 block of data
 				// start of crc
-				else if (i> 4095 && i<4113) begin	
+				else if (i> 4097 && i<4113) begin	
 					// 16 bits CRC after every block.
 					// Need to do this with each bit.
 					if (i & 1) begin	// If number is odd.
-						#640 IO_SDC1_D0_in = 1'b1;
+						#640 IO_SDC1_D0_in = 1'b0;
 	 				end
 					else begin
-						#640 IO_SDC1_D0_in = 1'b0;
+						#640 IO_SDC1_D0_in = 1'b1;
 	 				end
 				end
 				// end of crc
