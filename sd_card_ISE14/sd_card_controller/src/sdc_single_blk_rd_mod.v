@@ -60,12 +60,14 @@ module sdc_single_blk_rd_mod(
 	reg				crc_rdy_strb_z1;	// delay
 	reg				not_strted;			// flag that we have not started taking data
 	reg				wrd_rdy_strb_z1;	// delay
+	reg				wrd_rdy_strb_z2;	// delay
 	reg				fin_blk_strb_z1;	// delay
 
 	wire 				fin_blk_strb;		// Finished with 1 block of data (64 words, 512 bytes).
 	wire	[7:0] 	wrd_cnt;				// Counts how many words have been collected from sd card.
 	wire	[4:0]		crc_shift_cnt;		// bit count for crc shift
 	wire				wrd_rdy_strb;		// 64 bits for each word are collected
+	wire	[5:0]		bit_shift_cnt;		// bit shift cnts for each word
 
 	// Initialize sequential logic
    initial			
@@ -78,6 +80,7 @@ module sdc_single_blk_rd_mod(
 		tfc_reg				<= 1'b0;
 		not_strted			<= 1'b1;
 		wrd_rdy_strb_z1	<= 1'b0;
+		wrd_rdy_strb_z2	<= 1'b0;
 		//latch_wrd_strb		<= 1'b0;
 		latch_crc_strb		<= 1'b0;
 		fin_blk_strb_z1	<= 1'b0;
@@ -91,6 +94,7 @@ module sdc_single_blk_rd_mod(
 			strt_bit_strb_z1	<= 1'b0;
 			crc_rdy_strb_z1	<= 1'b0;
 			wrd_rdy_strb_z1	<= 1'b0;
+			wrd_rdy_strb_z2	<= 1'b0;
 			fin_blk_strb_z1	<= 1'b0;
 		end
 		else begin
@@ -98,6 +102,7 @@ module sdc_single_blk_rd_mod(
 			strt_bit_strb_z1	<= strt_bit_strb;
 			crc_rdy_strb_z1	<= crc_rdy_strb;
 			wrd_rdy_strb_z1	<= wrd_rdy_strb;
+			wrd_rdy_strb_z2	<= wrd_rdy_strb_z1;
 			fin_blk_strb_z1	<= fin_blk_strb;
 		end
 	end   
@@ -107,7 +112,7 @@ module sdc_single_blk_rd_mod(
 	// for data bram
 	assign dat_wrd = dat_wrd_reg;
    assign crc_16 = crc_16_reg;
-	assign latch_wrd_strb = wrd_rdy_strb_z1 && !not_strted;
+	assign latch_wrd_strb = wrd_rdy_strb && !not_strted;
 
 	// Create the not_strted flag when data has not come in yet.
 	// If we have a start bit from the sd card, we have started
@@ -164,7 +169,7 @@ module sdc_single_blk_rd_mod(
 		.reset(reset),	
 		.enable(1'b1), 	
 		.start_strb(strt_bit_strb | (~not_strted && wrd_rdy_strb && (wrd_cnt < 6'h3f))), 	 	
-		.cntr(), 
+		.cntr(bit_shift_cnt), 
 		.strb(wrd_rdy_strb)            
 	);	 
  
@@ -172,7 +177,7 @@ module sdc_single_blk_rd_mod(
    always @(posedge sdc_clk) begin
       if (reset)
          ie_reg <= 1'b0;
-      else if (strt_bit_strb)
+      else if (!d0_in && d0_in_z1 && not_strted /*strt_bit_strb*/)
          ie_reg <= 1'b1;
  		else if (fin_blk_strb)
 			ie_reg <= 1'b0;
@@ -207,10 +212,11 @@ module sdc_single_blk_rd_mod(
   
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
-	// Need a 16 clocks counter to shift in the crc.
+	// Need a 14 clocks counter to shift in the crc.
+	// This is because we start early by 2 clocks.
 	//-------------------------------------------------------------------------
 	defparam crc_shift_cntr.dw 	= 5;
-	defparam crc_shift_cntr.max	= 5'h10;	
+	defparam crc_shift_cntr.max	= 5'hE;	
 	//-------------------------------------------------------------------------
 	CounterSeq crc_shift_cntr(
 		.clk(sdc_clk), 	 
@@ -224,9 +230,10 @@ module sdc_single_blk_rd_mod(
 	// Set ie_crc_reg true to shift in the crc.
    always @(posedge sdc_clk) begin
       if (reset)
-         ie_crc_reg <= 1'b0;
-      else if (fin_blk_strb && !fin_blk_strb_z1)	// rising edge
-         ie_crc_reg <= 1'b1;
+         ie_crc_reg <= 1'b0;	// rising edge
+      //else if ((wrd_rdy_strb && !wrd_rdy_strb_z1) && (wrd_cnt == 8'h3F) /*fin_blk_strb && !fin_blk_strb_z1*/)	// rising edge
+      else if (bit_shift_cnt == 6'h3E && wrd_cnt == 8'h3F)  
+			ie_crc_reg <= 1'b1;
  		else if (crc_rdy_strb)
 			ie_crc_reg <= 1'b0;
    end	

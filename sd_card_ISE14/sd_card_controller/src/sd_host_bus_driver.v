@@ -543,6 +543,8 @@ module sd_host_bus_driver
          snd_cmd13_strb_z3          <= 1'b0;
 			rcv_wrd_strb_z1				<= 1'b0;
 			rcv_crc_strb_z1				<= 1'b0;
+			rcv_wrd_strb_z2				<= 1'b0;
+			rcv_crc_strb_z2				<= 1'b0;
 			rcv_wrd_rdy_strb_z1			<= 1'b0;
 			rcv_crc_rdy_strb_z1			<= 1'b0;
 		end
@@ -618,6 +620,8 @@ module sd_host_bus_driver
          snd_cmd13_strb_z3          <= snd_cmd13_strb_z2;
 			rcv_wrd_strb_z1				<= rcv_wrd_strb;
 			rcv_crc_strb_z1				<= rcv_crc_strb;
+			rcv_wrd_strb_z2				<= rcv_wrd_strb_z1;
+			rcv_crc_strb_z2				<= rcv_crc_strb_z1;
 			rcv_wrd_rdy_strb_z1			<= rcv_wrd_rdy_strb;
 			rcv_crc_rdy_strb_z1			<= rcv_crc_rdy_strb;
 		end	
