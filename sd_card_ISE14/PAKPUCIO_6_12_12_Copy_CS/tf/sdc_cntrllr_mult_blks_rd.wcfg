@@ -187,6 +187,10 @@
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ff00ff</obj_property>
       </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/sdc_clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">sdc_clk</obj_property>
+         <obj_property name="ObjectShortName">sdc_clk</obj_property>
+      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/d0_in" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">d0_in</obj_property>
          <obj_property name="ObjectShortName">d0_in</obj_property>
@@ -224,6 +228,10 @@
          <obj_property name="ObjectShortName">crc_rdy_strb</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#00ffff</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/latch_crc_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">latch_crc_strb</obj_property>
+         <obj_property name="ObjectShortName">latch_crc_strb</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/crc_16" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">crc_16[15:0]</obj_property>

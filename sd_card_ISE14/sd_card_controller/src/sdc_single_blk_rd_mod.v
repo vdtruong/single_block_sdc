@@ -44,7 +44,8 @@ module sdc_single_blk_rd_mod(
 	//output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
 	output				latch_wrd_strb,
 	output				tfc,				// transfer of one block is complete
-	output reg			latch_crc_strb,// Finished capturing crc, latch into bram.
+	//output reg			latch_crc_strb,// Finished capturing crc, latch into bram.
+	output				latch_crc_strb,
 	output	[63:0]	dat_wrd,			// 64 bits data word.  Each register of the PUC.
 	output	[15:0] 	crc_16			// 16 bits crc register.
 );	
@@ -68,6 +69,7 @@ module sdc_single_blk_rd_mod(
 	wire	[4:0]		crc_shift_cnt;		// bit count for crc shift
 	wire				wrd_rdy_strb;		// 64 bits for each word are collected
 	wire	[5:0]		bit_shift_cnt;		// bit shift cnts for each word
+	wire				crc_rdy_strb;		// crc word is ready
 
 	// Initialize sequential logic
    initial			
@@ -82,7 +84,7 @@ module sdc_single_blk_rd_mod(
 		wrd_rdy_strb_z1	<= 1'b0;
 		wrd_rdy_strb_z2	<= 1'b0;
 		//latch_wrd_strb		<= 1'b0;
-		latch_crc_strb		<= 1'b0;
+		//latch_crc_strb		<= 1'b0;
 		fin_blk_strb_z1	<= 1'b0;
 	end
 	
@@ -113,6 +115,7 @@ module sdc_single_blk_rd_mod(
 	assign dat_wrd = dat_wrd_reg;
    assign crc_16 = crc_16_reg;
 	assign latch_wrd_strb = wrd_rdy_strb && !not_strted;
+	assign latch_crc_strb = crc_rdy_strb;
 
 	// Create the not_strted flag when data has not come in yet.
 	// If we have a start bit from the sd card, we have started
@@ -148,14 +151,14 @@ module sdc_single_blk_rd_mod(
 	//end
 
 	// Strobe the bram fifo when crc_rdy_strb and read commands only.
-	always @(posedge sdc_clk) begin
-		if (reset)
-			latch_crc_strb <= 1'b0;
-		if (crc_rdy_strb && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
-      	latch_crc_strb	<= 1'b1;             
-		else                          
-         latch_crc_strb	<= 1'b0;
-	end
+	//always @(posedge sdc_clk) begin
+	//	if (reset)
+	//		latch_crc_strb <= 1'b0;
+	//	if (crc_rdy_strb && (command[13:8] == 6'h11 || command[13:8] == 6'h12)) 		
+     // 	latch_crc_strb	<= 1'b1;             
+	//	else                          
+     //    latch_crc_strb	<= 1'b0;
+	//end
 
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
@@ -212,11 +215,11 @@ module sdc_single_blk_rd_mod(
   
 	/////////////////////////////////////////////////////////////////////////
 	//-------------------------------------------------------------------------
-	// Need a 14 clocks counter to shift in the crc.
-	// This is because we start early by 2 clocks.
+	// Need a 13 clocks counter to shift in the crc.
+	// This is because we start early by 3 clocks.
 	//-------------------------------------------------------------------------
 	defparam crc_shift_cntr.dw 	= 5;
-	defparam crc_shift_cntr.max	= 5'hE;	
+	defparam crc_shift_cntr.max	= 5'hD;	
 	//-------------------------------------------------------------------------
 	CounterSeq crc_shift_cntr(
 		.clk(sdc_clk), 	 
