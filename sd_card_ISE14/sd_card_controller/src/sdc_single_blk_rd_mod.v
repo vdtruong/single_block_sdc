@@ -24,7 +24,7 @@
 // 					CRC is received, it will also signals to the ADMA2 state
 // 					machine that the data transfer is complete.
 // 					4. State Collect CRC.  This state will collect the CRC at
-// 					the end of a block of data.  It will then go to state 3.
+// 					the end of a block of data.  It will then go to state 5.
 //						5. Latch crc into bram.	
 //
 // Dependencies: 	
@@ -191,10 +191,14 @@ module sdc_single_blk_rd_mod(
 	begin
 		if (reset)
 			dat_wrd_reg 			<= {64{1'b0}};
+ 		// Shifts in from LSB.
  		else if (ie_reg) begin
 			dat_wrd_reg[0] 		<= d0_in;
  			dat_wrd_reg[63:1] 	<= dat_wrd_reg[62:0];
 		end
+		// Clear after every block.
+		else if (fin_blk_strb)
+			dat_wrd_reg 			<= {64{1'b0}};
 	end
  
 	//-------------------------------------------------------------------------
@@ -250,6 +254,8 @@ module sdc_single_blk_rd_mod(
 			crc_16_reg[0] 		<= d0_in;
  			crc_16_reg[15:1] 	<= crc_16_reg[14:0];
 		end
+		else if (tfc_reg) // clear for next crc
+			crc_16_reg			<= {16{1'b0}};
 	end
 
 	// Single block read State Machine
@@ -298,12 +304,12 @@ module sdc_single_blk_rd_mod(
 					tfc_reg			   			<= 1'b0;	     
             end  													
             state_latch_bram : begin		// x0004
-               //if (fin_blk_strb)     		// If finished with data block, start to collect the crc.   
-               //	state 		        	 	<= state_rd_crc;         
+               if (wrd_rdy_strb_z1 && ie_crc_reg)     		// If finished with data block, start to collect the crc.   
+               	state 		        	 	<= state_rd_crc;         
                //else if (!fin_blk_strb)                       
                  // state 				   	<= state_rd_dat;
-			 		//else                   
-             	state								<= state_rd_dat; 
+			 		else                   
+             		state							<= state_rd_dat; 
                //<outputs> <= <values>;	 			
 					tfc_reg			   			<= 1'b0;	                      	
             end
