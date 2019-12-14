@@ -1167,7 +1167,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
 		// Wait a while before starting to send back data.
-		#5_000_000;
+		#5_000_000;	// 5 ms
 		
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
@@ -1214,7 +1214,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 47 ms, send the cmd12 response.
+		// After 50 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
 		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
@@ -1350,7 +1350,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
 		// Wait a while before starting to send back data.
-		#5_000_000;
+		#5_000_000;	// 5 ms
 		
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
@@ -1397,7 +1397,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 47 ms, send the cmd12 response.
+		// After 50 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
 		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
