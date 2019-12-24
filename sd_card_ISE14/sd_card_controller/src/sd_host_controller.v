@@ -566,8 +566,8 @@ module sd_host_controller(
 		// new_resp_pkt_strb indicates the end bit of the command response.
 		// Use falling edge because new_resp_pkt_strb is from the sdc_clock. 							  
 		// Do not clear if command is cmd12 nor cmd23.
-		else if (((!new_resp_pkt_strb && new_resp_pkt_strb_z1) ||												// cmd12		
-					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1) || software_reset[1]) && (command[13:8] != 6'h0C)) 
+		else if ((!new_resp_pkt_strb && new_resp_pkt_strb_z1) || // falling edge						// cmd12		
+					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1) || software_reset[1]) //&& (command[13:8] != 6'h0C)) 
 			present_state 		<= present_state & 32'hFFFF_FFFE;
 		
 		// Command Inhibit (DAT) bit.  Bit 1. present_state[1].

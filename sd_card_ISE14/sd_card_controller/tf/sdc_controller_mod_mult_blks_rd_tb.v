@@ -1094,6 +1094,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// eigth
 		//-------------------------------------	
 		////////////////////////////////////////
+		
 		////////////////////////////////////////
 		//      Now we read multiple blocks.
 		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
@@ -1277,6 +1278,8 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
+		////////////////////////////////////////
+		
 		////////////////////////////////////////
 		//      The second multiple blocks read.
 		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
