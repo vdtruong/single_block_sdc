@@ -10,16 +10,32 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="9" />
+   <WVObjectSize size="12" />
+   <wvobject fp_name="group159" type="group">
+      <obj_property name="label">sim_mod</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/i" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">i[31:0]</obj_property>
+         <obj_property name="ObjectShortName">i[31:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/j" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">j[31:0]</obj_property>
+         <obj_property name="ObjectShortName">j[31:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+   </wvobject>
    <wvobject fp_name="group196" type="group">
       <obj_property name="label">adma2</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/adma2_fsm_u2/state" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
          <obj_property name="ElementShortName">state[14:0]</obj_property>
          <obj_property name="ObjectShortName">state[14:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ff00ff</obj_property>
+         <obj_property name="label">state[14:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/adma2_fsm_u2/des_fifo_rd_strb" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">des_fifo_rd_strb</obj_property>
@@ -55,23 +71,539 @@
          <obj_property name="ObjectShortName">des_attr[5:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/adma2_fsm_u2/snd_auto_cmd12_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">snd_auto_cmd12_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">snd_auto_cmd12_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/adma2_fsm_u2/snd_auto_cmd12_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">snd_auto_cmd12_strb</obj_property>
+         <obj_property name="ObjectShortName">snd_auto_cmd12_strb</obj_property>
+      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/adma2_fsm_u2/adma2_rdy_to_snd_dat_strb" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">adma2_rdy_to_snd_dat_strb</obj_property>
          <obj_property name="ObjectShortName">adma2_rdy_to_snd_dat_strb</obj_property>
       </wvobject>
    </wvobject>
-   <wvobject fp_name="group159" type="group">
-      <obj_property name="label">sim_mod</obj_property>
+   <wvobject fp_name="group374" type="group">
+      <obj_property name="label">asynch_abrt</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/i" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">i[31:0]</obj_property>
-         <obj_property name="ObjectShortName">i[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/clock" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock</obj_property>
+         <obj_property name="ObjectShortName">clock</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/j" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">j[31:0]</obj_property>
-         <obj_property name="ObjectShortName">j[31:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/enb_abort_trans" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">enb_abort_trans</obj_property>
+         <obj_property name="ObjectShortName">enb_abort_trans</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/fin_cmnd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_cmnd_strb</obj_property>
+         <obj_property name="ObjectShortName">fin_cmnd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/iss_abrt_cmd" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">iss_abrt_cmd</obj_property>
+         <obj_property name="ObjectShortName">iss_abrt_cmd</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/rd_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/rd_reg_input" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_output" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/async_abort_trans_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">async_abort_trans_proc</obj_property>
+         <obj_property name="ObjectShortName">async_abort_trans_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/read_clks_tout" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">read_clks_tout</obj_property>
+         <obj_property name="ObjectShortName">read_clks_tout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/rd_to_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_to_strb</obj_property>
+         <obj_property name="ObjectShortName">rd_to_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/rd_input_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_input_strb</obj_property>
+         <obj_property name="ObjectShortName">rd_input_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/iss_abrt_cmd_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">iss_abrt_cmd_reg</obj_property>
+         <obj_property name="ObjectShortName">iss_abrt_cmd_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/wr_reg_output_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/rd_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/async_abort_trans_proc_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">async_abort_trans_proc_reg</obj_property>
+         <obj_property name="ObjectShortName">async_abort_trans_proc_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans/state" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">state[7:0]</obj_property>
+         <obj_property name="ObjectShortName">state[7:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group303" type="group">
+      <obj_property name="label">iss_cmd</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/issue_sd_cmd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">issue_sd_cmd_strb</obj_property>
+         <obj_property name="ObjectShortName">issue_sd_cmd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/cmd_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_index[5:0]</obj_property>
+         <obj_property name="ObjectShortName">cmd_index[5:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/argument" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">argument[31:0]</obj_property>
+         <obj_property name="ObjectShortName">argument[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/command_type" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">command_type[1:0]</obj_property>
+         <obj_property name="ObjectShortName">command_type[1:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/data_pres_select" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">data_pres_select</obj_property>
+         <obj_property name="ObjectShortName">data_pres_select</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/cmd_indx_chk_enb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_indx_chk_enb</obj_property>
+         <obj_property name="ObjectShortName">cmd_indx_chk_enb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/cmd_crc_chk_enb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_crc_chk_enb</obj_property>
+         <obj_property name="ObjectShortName">cmd_crc_chk_enb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/resp_type_select" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">resp_type_select[1:0]</obj_property>
+         <obj_property name="ObjectShortName">resp_type_select[1:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/issue_cmd_with_busy" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">issue_cmd_with_busy</obj_property>
+         <obj_property name="ObjectShortName">issue_cmd_with_busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/issue_abort_cmd_flag" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">issue_abort_cmd_flag</obj_property>
+         <obj_property name="ObjectShortName">issue_abort_cmd_flag</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/rd_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/rd_reg_input" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_output" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/reg_attr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_attr[2:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_attr[2:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/fin_a_cmd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_strb</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/iss_sd_cmd_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">iss_sd_cmd_proc</obj_property>
+         <obj_property name="ObjectShortName">iss_sd_cmd_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/read_clks_tout" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">read_clks_tout</obj_property>
+         <obj_property name="ObjectShortName">read_clks_tout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/cmd_indx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_indx[5:0]</obj_property>
+         <obj_property name="ObjectShortName">cmd_indx[5:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/arg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">arg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">arg[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/cmd_line_free" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_line_free</obj_property>
+         <obj_property name="ObjectShortName">cmd_line_free</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/dat_line_free" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">dat_line_free</obj_property>
+         <obj_property name="ObjectShortName">dat_line_free</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/rd_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/wr_reg_output_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/reg_attr_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_attr_reg[2:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_attr_reg[2:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/fin_a_cmd_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/iss_sd_cmd_proc_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">iss_sd_cmd_proc_reg</obj_property>
+         <obj_property name="ObjectShortName">iss_sd_cmd_proc_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/rd_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/issue_sd_cmd_u6/state" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">state[11:0]</obj_property>
+         <obj_property name="ObjectShortName">state[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group268" type="group">
+      <obj_property name="label">fin_cmd</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/fin_a_cmd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_strb</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/cmd_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_index[5:0]</obj_property>
+         <obj_property name="ObjectShortName">cmd_index[5:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/cmd_with_tf_compl_int" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_with_tf_compl_int</obj_property>
+         <obj_property name="ObjectShortName">cmd_with_tf_compl_int</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/end_bit_det_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">end_bit_det_strb</obj_property>
+         <obj_property name="ObjectShortName">end_bit_det_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/rd_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/rd_reg_input" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_input[127:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_output" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/reg_attr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_attr[2:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_attr[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/err_int_stat" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">err_int_stat[15:0]</obj_property>
+         <obj_property name="ObjectShortName">err_int_stat[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/fin_a_cmd_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_proc</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/fin_cmnd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_cmnd_strb</obj_property>
+         <obj_property name="ObjectShortName">fin_cmnd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/read_clks_tout" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">read_clks_tout</obj_property>
+         <obj_property name="ObjectShortName">read_clks_tout</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/rd_to_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_to_strb</obj_property>
+         <obj_property name="ObjectShortName">rd_to_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/cmd_compl" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">cmd_compl</obj_property>
+         <obj_property name="ObjectShortName">cmd_compl</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/tf_compl" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">tf_compl</obj_property>
+         <obj_property name="ObjectShortName">tf_compl</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/rd_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/wr_reg_output_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/reg_attr_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_attr_reg[2:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_attr_reg[2:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/err_int_stat_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">err_int_stat_reg[15:0]</obj_property>
+         <obj_property name="ObjectShortName">err_int_stat_reg[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/fin_a_cmd_proc_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_proc_reg</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_proc_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/fin_cmnd_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_cmnd_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">fin_cmnd_strb_reg</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/rd_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/err" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">err</obj_property>
+         <obj_property name="ObjectShortName">err</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/end_bit_det_strb_z1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">end_bit_det_strb_z1</obj_property>
+         <obj_property name="ObjectShortName">end_bit_det_strb_z1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmnd_u7/state" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">state[15:0]</obj_property>
+         <obj_property name="ObjectShortName">state[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group131" type="group">
+      <obj_property name="label">sd_hc</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_strb_z1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_z1</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_z1</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_input" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_input[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_input[31:0]</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/end_bit_det_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">end_bit_det_strb</obj_property>
+         <obj_property name="ObjectShortName">end_bit_det_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_2_pkt_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_resp_2_pkt_strb</obj_property>
+         <obj_property name="ObjectShortName">new_resp_2_pkt_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_2_pkt_strb_z1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_resp_2_pkt_strb_z1</obj_property>
+         <obj_property name="ObjectShortName">new_resp_2_pkt_strb_z1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/software_reset" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">software_reset[7:0]</obj_property>
+         <obj_property name="ObjectShortName">software_reset[7:0]</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/normal_int_status" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">normal_int_status[15:0]</obj_property>
+         <obj_property name="ObjectShortName">normal_int_status[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/present_state" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">present_state[31:0]</obj_property>
+         <obj_property name="ObjectShortName">present_state[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
+         <obj_property name="label">present_state[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/reg_selected" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_selected[127:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_selected[127:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/command" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">command[15:0]</obj_property>
+         <obj_property name="ObjectShortName">command[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/block_size" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">block_size[15:0]</obj_property>
+         <obj_property name="ObjectShortName">block_size[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/block_count" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">block_count[15:0]</obj_property>
+         <obj_property name="ObjectShortName">block_count[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/argument_1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">argument_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">argument_1[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_cmd_set_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_cmd_set_strb</obj_property>
+         <obj_property name="ObjectShortName">new_cmd_set_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/transfer_mode" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">transfer_mode[15:0]</obj_property>
+         <obj_property name="ObjectShortName">transfer_mode[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_resp_pkt_strb</obj_property>
+         <obj_property name="ObjectShortName">new_resp_pkt_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb_z1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_resp_pkt_strb_z1</obj_property>
+         <obj_property name="ObjectShortName">new_resp_pkt_strb_z1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb_z2" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">new_resp_pkt_strb_z2</obj_property>
+         <obj_property name="ObjectShortName">new_resp_pkt_strb_z2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/rd_reg_index" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/response" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">response[127:0]</obj_property>
+         <obj_property name="ObjectShortName">response[127:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/response_packet" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">response_packet[47:0]</obj_property>
+         <obj_property name="ObjectShortName">response_packet[47:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="group99" type="group">
@@ -82,10 +614,12 @@
          <obj_property name="ObjectShortName">reset</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/adma_end" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
          <obj_property name="ElementShortName">adma_end</obj_property>
          <obj_property name="ObjectShortName">adma_end</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         <obj_property name="label">adma_end</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/sdc_single_blk_rd_mod_u11/ie_reg" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">ie_reg</obj_property>
@@ -254,10 +788,6 @@
    <wvobject fp_name="group186" type="group">
       <obj_property name="label">sdc_cntrllr</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CLK" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">IO_SDC1_CLK</obj_property>
-         <obj_property name="ObjectShortName">IO_SDC1_CLK</obj_property>
-      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/clk" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">clk</obj_property>
          <obj_property name="ObjectShortName">clk</obj_property>
@@ -265,6 +795,18 @@
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_D0_in" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">IO_SDC1_D0_in</obj_property>
          <obj_property name="ObjectShortName">IO_SDC1_D0_in</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">IO_SDC1_CLK</obj_property>
+         <obj_property name="ObjectShortName">IO_SDC1_CLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CMD_out" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">IO_SDC1_CMD_out</obj_property>
+         <obj_property name="ObjectShortName">IO_SDC1_CMD_out</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CMD_in" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">IO_SDC1_CMD_in</obj_property>
+         <obj_property name="ObjectShortName">IO_SDC1_CMD_in</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/reset" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">reset</obj_property>
@@ -381,14 +923,6 @@
          <obj_property name="ElementShortName">IO_SDC1_D0_out</obj_property>
          <obj_property name="ObjectShortName">IO_SDC1_D0_out</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CMD_out" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">IO_SDC1_CMD_out</obj_property>
-         <obj_property name="ObjectShortName">IO_SDC1_CMD_out</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CMD_in" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">IO_SDC1_CMD_in</obj_property>
-         <obj_property name="ObjectShortName">IO_SDC1_CMD_in</obj_property>
-      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/IO_SDC1_CD_WP" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">IO_SDC1_CD_WP</obj_property>
          <obj_property name="ObjectShortName">IO_SDC1_CD_WP</obj_property>
@@ -484,12 +1018,6 @@
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#00ffff</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/dat_tf_adma_proc" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">dat_tf_adma_proc</obj_property>
-         <obj_property name="ObjectShortName">dat_tf_adma_proc</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#00ffff</obj_property>
-      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/rd_reg_index" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
          <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
@@ -500,32 +1028,130 @@
          <obj_property name="ObjectShortName">rd_reg_input[127:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_reg" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_reg" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/snd_auto_cmd12_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">snd_auto_cmd12_strb</obj_property>
+         <obj_property name="ObjectShortName">snd_auto_cmd12_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/dat_tf_adma_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">dat_tf_adma_proc</obj_property>
+         <obj_property name="ObjectShortName">dat_tf_adma_proc</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ffff</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_man" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_man</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_man</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/enb_int_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">enb_int_proc</obj_property>
+         <obj_property name="ObjectShortName">enb_int_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/sdc_det" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">sdc_det</obj_property>
+         <obj_property name="ObjectShortName">sdc_det</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/sd_clk_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">sd_clk_proc</obj_property>
+         <obj_property name="ObjectShortName">sd_clk_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/sd_clk_stop_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">sd_clk_stop_proc</obj_property>
+         <obj_property name="ObjectShortName">sd_clk_stop_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/card_init_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">card_init_proc</obj_property>
+         <obj_property name="ObjectShortName">card_init_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/iss_sd_cmd_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">iss_sd_cmd_proc</obj_property>
+         <obj_property name="ObjectShortName">iss_sd_cmd_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_a_cmd_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_a_cmd_proc</obj_property>
+         <obj_property name="ObjectShortName">fin_a_cmd_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_cmnd_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">fin_cmnd_strb</obj_property>
+         <obj_property name="ObjectShortName">fin_cmnd_strb</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/async_abort_trans_proc" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">async_abort_trans_proc</obj_property>
+         <obj_property name="ObjectShortName">async_abort_trans_proc</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_async" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_async</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_async</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_async" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_async[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_async[31:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_async" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_async[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_async[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
          <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="label">wr_reg_output[31:0]</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_reg" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
          <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+         <obj_property name="CustomSignalColor">#ff0000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_enb_int" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_enb_int[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_enb_int[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_data_tf" type="logic" db_ref_id="1">
          <obj_property name="DisplayName">label</obj_property>
@@ -549,20 +1175,102 @@
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_man" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_man</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_man</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output" type="array" db_ref_id="1">
-         <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="ElementShortName">wr_reg_output[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_output[31:0]</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_enb_int" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_enb_int</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_enb_int</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_sdc_det" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_sdc_det</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_sdc_det</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_sup_clk" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_sup_clk</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_sup_clk</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_clk_stop" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_clk_stop</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_clk_stop</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_card_init" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_card_init</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_card_init</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_iss" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_iss</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_iss</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_strb_fin" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_fin</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_fin</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_sdc_det" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_sdc_det[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_sdc_det[31:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
-         <obj_property name="label">wr_reg_output[31:0]</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_sup_clk" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_sup_clk[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_sup_clk[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_clk_stop" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_clk_stop[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_clk_stop[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_card_init" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_card_init[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_card_init[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_iss" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_iss[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_iss[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_output_fin" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_fin[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_fin[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_enb_int" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_enb_int[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_enb_int[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_sdc_det" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_sdc_det[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_sdc_det[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_sup_clk" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_sup_clk[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_sup_clk[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_clk_stop" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_clk_stop[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_clk_stop[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_card_init" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_card_init[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_card_init[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_iss" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_iss[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_iss[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/wr_reg_index_fin" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_fin[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_fin[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/rcv_crc_rdy_strb" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">rcv_crc_rdy_strb</obj_property>
@@ -596,10 +1304,6 @@
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/rcv_crc_strb" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">rcv_crc_strb</obj_property>
          <obj_property name="ObjectShortName">rcv_crc_strb</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/fin_cmnd_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">fin_cmnd_strb</obj_property>
-         <obj_property name="ObjectShortName">fin_cmnd_strb</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/command" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">command[15:0]</obj_property>
@@ -678,13 +1382,6 @@
          <obj_property name="ObjectShortName">command[15:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_index_reg" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
-      </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_index" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
          <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
@@ -692,9 +1389,9 @@
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_output_reg" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_index_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_index_reg[11:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_index_reg[11:0]</obj_property>
          <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
@@ -706,15 +1403,22 @@
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
       </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_strb_reg" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_output_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_output_reg[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
       </wvobject>
       <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_strb" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">wr_reg_strb</obj_property>
          <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffff00</obj_property>
+      </wvobject>
+      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_bus_driver_u1/data_tf_using_adma_u8/wr_reg_strb_reg" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_reg_strb_reg</obj_property>
+         <obj_property name="ObjectShortName">wr_reg_strb_reg</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#ffff00</obj_property>
       </wvobject>
@@ -820,133 +1524,6 @@
          <obj_property name="label">start_data_tf_strb</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="CustomSignalColor">#00ffff</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="group131" type="group">
-      <obj_property name="label">sd_hc</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/clk" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">clk</obj_property>
-         <obj_property name="ObjectShortName">clk</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_strb_z1" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_strb_z1</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_strb_z1</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_strb</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_strb</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_index" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_index[11:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_index[11:0]</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/wr_reg_input" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">wr_reg_input[31:0]</obj_property>
-         <obj_property name="ObjectShortName">wr_reg_input[31:0]</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ffff00</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/end_bit_det_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">end_bit_det_strb</obj_property>
-         <obj_property name="ObjectShortName">end_bit_det_strb</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_2_pkt_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_resp_2_pkt_strb</obj_property>
-         <obj_property name="ObjectShortName">new_resp_2_pkt_strb</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_2_pkt_strb_z1" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_resp_2_pkt_strb_z1</obj_property>
-         <obj_property name="ObjectShortName">new_resp_2_pkt_strb_z1</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/software_reset" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">software_reset[7:0]</obj_property>
-         <obj_property name="ObjectShortName">software_reset[7:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/normal_int_status" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">normal_int_status[15:0]</obj_property>
-         <obj_property name="ObjectShortName">normal_int_status[15:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/present_state" type="array" db_ref_id="1">
-         <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="ElementShortName">present_state[31:0]</obj_property>
-         <obj_property name="ObjectShortName">present_state[31:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
-         <obj_property name="label">present_state[31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/reg_selected" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">reg_selected[127:0]</obj_property>
-         <obj_property name="ObjectShortName">reg_selected[127:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/command" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">command[15:0]</obj_property>
-         <obj_property name="ObjectShortName">command[15:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/block_size" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">block_size[15:0]</obj_property>
-         <obj_property name="ObjectShortName">block_size[15:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/block_count" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">block_count[15:0]</obj_property>
-         <obj_property name="ObjectShortName">block_count[15:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/argument_1" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">argument_1[31:0]</obj_property>
-         <obj_property name="ObjectShortName">argument_1[31:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_cmd_set_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_cmd_set_strb</obj_property>
-         <obj_property name="ObjectShortName">new_cmd_set_strb</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/transfer_mode" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">transfer_mode[15:0]</obj_property>
-         <obj_property name="ObjectShortName">transfer_mode[15:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_resp_pkt_strb</obj_property>
-         <obj_property name="ObjectShortName">new_resp_pkt_strb</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb_z1" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_resp_pkt_strb_z1</obj_property>
-         <obj_property name="ObjectShortName">new_resp_pkt_strb_z1</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/new_resp_pkt_strb_z2" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">new_resp_pkt_strb_z2</obj_property>
-         <obj_property name="ObjectShortName">new_resp_pkt_strb_z2</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/rd_reg_index" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">rd_reg_index[11:0]</obj_property>
-         <obj_property name="ObjectShortName">rd_reg_index[11:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/response" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">response[127:0]</obj_property>
-         <obj_property name="ObjectShortName">response[127:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/sdc_controller_mod_multi_blks_rd_tb/uut/sd_host_controller_u2/response_packet" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">response_packet[47:0]</obj_property>
-         <obj_property name="ObjectShortName">response_packet[47:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>
