@@ -1215,10 +1215,10 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 50 us, send the cmd12 response.
+		// After 10 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
-		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#10000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
 		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
@@ -1400,10 +1400,10 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 50 us, send the cmd12 response.
+		// After 10 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
-		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#10000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
 		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
