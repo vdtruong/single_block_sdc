@@ -15,7 +15,7 @@
 //
 // Revision: 
 // Revision 0.01 - File Created
-// Additional Comments: 
+// Additional Comments: 3.8.1
 //                      An abort transaction is performed by issuing CMD12 for 
 //                      a SD memory card and by issuing CMD52 for a
 //                      SDIO card. There are two cases where the Host 
@@ -71,7 +71,7 @@ module async_abort_transaction(
    
 	wire		   read_clks_tout;         // finished reading register from host controller
 	// Get out of waiting if has not received a response from a cmnd.
-	wire		   rd_to_strb;	    
+	//wire		   rd_to_strb;	    
    
    
 	// Initialize sequential logic
@@ -103,14 +103,14 @@ module async_abort_transaction(
 	defparam readClksCntr_u1.dw 	= 3;
 	// Change this to reflect the number of counts you want.
 	// Count up to this number, starting at zero.
-	defparam readClksCntr_u1.max	= 3'h3;	
+	defparam readClksCntr_u1.max	= 3'h6;	
 	//-------------------------------------------------------------------------
 	CounterSeq readClksCntr_u1(
 		.clk(clock), 		// Clock input 50 MHz 
-		.reset(reset),	// GSR
+		.reset(reset),		// GS
 		.enable(1'b1), 	
 		// start the timing
-		.start_strb(rd_input_strb || wr_reg_strb_reg),   	 	
+		.start_strb(rd_input_strb || wr_reg_strb_reg),
 		.cntr(), 
 		.strb(read_clks_tout) 
 	);	  
@@ -118,34 +118,37 @@ module async_abort_transaction(
 	//-------------------------------------------------------------------------
 	// If we waited for 1 second and a command hasn't been responded yet,
 	// get out of the state machine.
+	// Read Time Out Clocks Counter.
 	//-------------------------------------------------------------------------
-	defparam readToClksCntr.dw 	= 28;
+	//defparam readToClksCntr.dw 	= 28;
 	// Change this to reflect the number of counts you want.
 	// Count up to this number, starting at zero.
-	defparam readToClksCntr.max	= 28'h2FAF080;	
+	//defparam readToClksCntr.max	= 28'h2FAF080;	
 	//-------------------------------------------------------------------------
-	CounterSeq readToClksCntr(
+	/*CounterSeq readToClksCntr(
 		.clk(clock), 		// Clock input 50 MHz 
-		.reset(reset),	// GSR
+		.reset(reset),		// GSR
 		.enable(1'b1), 	
 		// start the timing
 		.start_strb(rd_input_strb),   	 	
 		.cntr(), 
 		.strb(rd_to_strb) 
-	);		
+	);*/		
    
-   parameter st_strt                = 8'b0000_0001;
-   parameter st_iss_abrt_cmd        = 8'b0000_0010;
-   parameter st_iss_abrt_cmd_wt     = 8'b0000_0100;
-   parameter st_set_sftwre_rst      = 8'b0000_1000;
-   parameter st_set_sftwre_rst_wt   = 8'b0001_0000;
-   parameter st_chk_dr_and_cr       = 8'b0010_0000;
-   parameter st_chk_dr_and_cr_wt    = 8'b0100_0000;
-   parameter st_end                 = 8'b1000_0000;
+   parameter st_strt                	= 10'b00_0000_0001;	// 001
+   parameter st_iss_abrt_cmd        	= 10'b00_0000_0010;	// 002
+   parameter st_iss_abrt_cmd_wt     	= 10'b00_0000_0100;	// 004
+   parameter st_set_sftwre_rst      	= 10'b00_0000_1000;	// 008
+   parameter st_set_sftwre_rst_wt   	= 10'b00_0001_0000;	// 010
+   parameter st_chk_dr_and_cr       	= 10'b00_0010_0000;	// 020
+   parameter st_chk_dr_and_cr_wt    	= 10'b00_0100_0000;	// 040
+   parameter st_clr_sftw_rst_bits   	= 10'b00_1000_0000;	// 080
+	parameter st_clr_sftw_rst_bits_wt	= 10'b01_0000_0000;	// 100
+	parameter st_end                 	= 10'b10_0000_0000;	// 200
 
    (* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
    SAFE_RECOVERY_STATE="<recovery_state_value>" *) 
-   reg [7:0] state = st_strt;
+   reg [9:0] state = st_strt;
 
    always@(posedge clock)
       if (reset) begin
@@ -178,7 +181,7 @@ module async_abort_transaction(
             st_iss_abrt_cmd : begin
                state                      <= st_iss_abrt_cmd_wt;
                   //<outputs> <= <values>;
-               iss_abrt_cmd_reg           <= 1'b1;    // start strobe   
+               iss_abrt_cmd_reg           <= 1'b1;    					// start strobe - start 3.7.1.1
                rd_input_strb	            <= 1'b0;			
                rd_reg_index_reg    	      <= 12'h000;		
                wr_reg_strb_reg	         <= 1'b0;			
@@ -186,13 +189,13 @@ module async_abort_transaction(
                wr_reg_output_reg   	      <= {32{1'b0}};
                async_abort_trans_proc_reg <= 1'b0;		             
             end
-            st_iss_abrt_cmd_wt : begin
-               if (fin_cmnd_strb)               // may need time out
+            st_iss_abrt_cmd_wt : begin											// wait until 3.7.1.2 to finish
+               if (fin_cmnd_strb)               							// may need time out
                   state                   <= st_set_sftwre_rst; 
                else                       
                   state                   <= st_iss_abrt_cmd_wt;
                   //<outputs> <= <values>;
-               iss_abrt_cmd_reg           <= 1'b0;    // end strobe
+               iss_abrt_cmd_reg           <= 1'b0;    					// end strobe
                rd_input_strb	            <= 1'b0;			
                rd_reg_index_reg    	      <= 12'h000;		
                wr_reg_strb_reg	         <= 1'b0;			
@@ -200,50 +203,55 @@ module async_abort_transaction(
                wr_reg_output_reg   	      <= {32{1'b0}};
                async_abort_trans_proc_reg <= 1'b0;		 
             end
-            st_set_sftwre_rst : begin
-               state                      <= st_set_sftwre_rst_wt;
+				// When the above are done, start the software reset in the host controller memory map.
+            st_set_sftwre_rst : begin											// 008						
+					state                      <= st_set_sftwre_rst_wt;
                //<outputs> <= <values>;   
                iss_abrt_cmd_reg           <= 1'b0;        
                rd_input_strb	            <= 1'b0;			 
                rd_reg_index_reg 	         <= 12'h000;		 
-               wr_reg_strb_reg	         <= 1'b1;			 
+               wr_reg_strb_reg	         <= 1'b1;							// Set strobe.		 
                wr_reg_index_reg	         <= 12'h02F;		 
-               wr_reg_output_reg	         <= 32'h00000006;
-               async_abort_trans_proc_reg <= 1'b1;    // need to talk to host controller		 
+               wr_reg_output_reg	         <= 32'h00000006;				// Reset the necessary bits.
+               async_abort_trans_proc_reg <= 1'b1;    					// need to talk to host controller		 
             end
-            st_set_sftwre_rst_wt : begin		 				  
+				// Wait here for six clocks then check the softwre reset register to
+				// see if the reset is done.
+            st_set_sftwre_rst_wt : begin										// 010		 				 
                if (read_clks_tout)
                   state 				      <= st_chk_dr_and_cr;
-               else if (!read_clks_tout)
-                  state 	               <= st_set_sftwre_rst_wt;				
+               else if (!read_clks_tout)										
+						state 	               <= st_set_sftwre_rst_wt;	// Now go see if the reset is done.
                else                 
                   state 				      <= st_strt;	
                   //<outputs> <= <values>;
                iss_abrt_cmd_reg           <= 1'b0;     
-               rd_input_strb	            <= 1'b0;			
-               rd_reg_index_reg    	      <= 12'h000;		
-               wr_reg_strb_reg	         <= 1'b0;			
-               wr_reg_index_reg	         <= 12'h02F;		
+               rd_input_strb	            <= 1'b0;		
+               rd_reg_index_reg    	      <= 12'h000;	
+               wr_reg_strb_reg	         <= 1'b0;		
+               wr_reg_index_reg	         <= 12'h02F;	
                wr_reg_output_reg   	      <= 32'h00000006;
-               async_abort_trans_proc_reg <= 1'b1;		// need to talk to host controller 
-            end
-            st_chk_dr_and_cr : begin
+               async_abort_trans_proc_reg <= 1'b1;							// need to talk to host controller 
+            end	
+            st_chk_dr_and_cr : begin											// 020
                state                      <= st_chk_dr_and_cr_wt;
                //<outputs> <= <values>;
-               iss_abrt_cmd_reg           <= 1'b0;         
+               iss_abrt_cmd_reg           <= 1'b0;        
                rd_input_strb	            <= 1'b1;			 
                rd_reg_index_reg 	         <= 12'h02F;		 
                wr_reg_strb_reg	         <= 1'b0;			 
                wr_reg_index_reg	         <= 12'h000;		 
                wr_reg_output_reg	         <= 32'h00000000;
-               async_abort_trans_proc_reg <= 1'b1;		 // need to talk to host controller
+               async_abort_trans_proc_reg <= 1'b1;		 					// need to talk to host controller
             end
-            st_chk_dr_and_cr_wt : begin
+				// Give it six clocks to reset the bits.
+				// After six clocks, assume bits are reset.
+            st_chk_dr_and_cr_wt : begin										// 040
                if (read_clks_tout)
-                  state 				      <= st_end;
+                  state 				      <= st_clr_sftw_rst_bits;
                else if (!read_clks_tout)
                   state 				      <= st_chk_dr_and_cr_wt;		 
-					// If card is not ready for data, quit this process.
+					//
                else
                   state 			         <= st_strt;	
                iss_abrt_cmd_reg           <= 1'b0;        
@@ -252,9 +260,39 @@ module async_abort_transaction(
                wr_reg_strb_reg	         <= 1'b0;			 
                wr_reg_index_reg	         <= 12'h000;		 
                wr_reg_output_reg	         <= 32'h00000000;
-               async_abort_trans_proc_reg <= 1'b1;		 // need to talk to host controller
+               async_abort_trans_proc_reg <= 1'b1;		 					// need to talk to host controller
             end
-            st_end : begin
+            // After the software resets are done, we need to clear the
+				// trigger bits.
+				st_clr_sftw_rst_bits : begin										// 080
+					state                      <= st_clr_sftw_rst_bits_wt;
+               //<outputs> <= <values>;   
+               iss_abrt_cmd_reg           <= 1'b0;        
+               rd_input_strb	            <= 1'b0;			 
+               rd_reg_index_reg 	         <= 12'h000;		 
+               wr_reg_strb_reg	         <= 1'b1;							// Set strobe.		 
+               wr_reg_index_reg	         <= 12'h02F;		 
+               wr_reg_output_reg	         <= 32'h00000000;				// Reset the trigger bits.
+               async_abort_trans_proc_reg <= 1'b1;    					// need to talk to host controller		 
+            end
+				// Wait here for six clocks.
+            st_clr_sftw_rst_bits_wt : begin		 				 			// 100
+               if (read_clks_tout)
+                  state 				      <= st_end;
+               else if (!read_clks_tout)										
+						state 	               <= st_clr_sftw_rst_bits_wt;// Now go see if the reset is done.
+               else                 
+                  state 				      <= st_strt;	
+                  //<outputs> <= <values>;
+               iss_abrt_cmd_reg           <= 1'b0;     
+               rd_input_strb	            <= 1'b0;		
+               rd_reg_index_reg    	      <= 12'h000;	
+               wr_reg_strb_reg	         <= 1'b0;		
+               wr_reg_index_reg	         <= 12'h02F;	
+               wr_reg_output_reg   	      <= 32'h00000000;
+               async_abort_trans_proc_reg <= 1'b1;							// need to talk to host controller 
+            end
+				st_end : begin															// 200
                state                      <= st_strt;
                //<outputs> <= <values>;
                iss_abrt_cmd_reg           <= 1'b0;        
@@ -265,7 +303,7 @@ module async_abort_transaction(
                wr_reg_output_reg	         <= 32'h00000000;
                async_abort_trans_proc_reg <= 1'b0;		 
             end
-            default: begin  // Fault Recovery
+            default: begin  														// Fault Recovery
                state                      <= st_strt;
                //<outputs> <= <values>;
                iss_abrt_cmd_reg           <= 1'b0;        
@@ -277,6 +315,6 @@ module async_abort_transaction(
                async_abort_trans_proc_reg <= 1'b0;		 
             end
          endcase
-							
+						
 
 endmodule

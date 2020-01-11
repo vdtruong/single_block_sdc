@@ -556,7 +556,7 @@ module sd_host_controller(
 		// for command 0.
 		else if (wr_reg_index == 12'h00E && wr_reg_strb_z1 && (command[13:8] > 6'h00))
 			present_state		<= present_state | 32'h0000_0001;
-		// clears command inhibit (CMD) bit.  Bit 0.
+		// clears command inhibit (CMD) bit.  Bit 0. present_state[0].
 		// This bit is cleared when the command response is received.
 		// For both kinds of responses?
 		// new_resp_pkt_strb cannot be used for cmd12 and 23.
@@ -566,8 +566,8 @@ module sd_host_controller(
 		// new_resp_pkt_strb indicates the end bit of the command response.
 		// Use falling edge because new_resp_pkt_strb is from the sdc_clock. 							  
 		// Do not clear if command is cmd12 nor cmd23.
-		else if ((!new_resp_pkt_strb && new_resp_pkt_strb_z1) || // falling edge						// cmd12		
-					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1) || software_reset[1]) //&& (command[13:8] != 6'h0C)) 
+		else if (((!new_resp_pkt_strb && new_resp_pkt_strb_z1) || // falling edge						// and not cmd12		
+					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1)) /*|| software_reset[1])*/ && (command[13:8] != 6'h0C)) 
 			present_state 		<= present_state & 32'hFFFF_FFFE;
 		
 		// Command Inhibit (DAT) bit.  Bit 1. present_state[1].
@@ -613,15 +613,27 @@ module sd_host_controller(
  		else if (end_descr)                                    
 			present_state 		<= present_state & 32'hFFFF_FDFF;   
 
+ 		// Bit 10.  Write Transfer Active.
+		// This bit is set to 1 after the end bit of the write command.
+		else if ((end_bit_det_strb && (!end_bit_det_strb_z1)) && ((command[13:8] == 6'h18) || (command[13:8] == 6'h19)))	 
+			present_state	 	<= present_state | 32'h0000_0100;
+		// In the case of ADMA2, the last block is designated by the last
+		// transfer of Descriptor Table.
+ 		else if (end_descr)                                    
+			present_state 		<= present_state & 32'hFFFF_FEFF;   
+
  		// If card is inserted, bit 16                           
 //		else if (card_inserted_strb)                             
 //			present_state		<= present_state | 32'h0001_0000;   
 //		// If card is removed, bit 16                            
 //		else if (card_removed_strb)                              
-//			present_state		<= present_state & 32'hFFFE_FFFF;   
+//			present_state		<= present_state & 32'hFFFE_FFFF; 
+//		Clear bits when software_reset is set.
 		else if (software_reset[2])                              // software reset[2]                      
-			present_state 		<= present_state & 32'hFFF0_FFF9;
-		else 
+			present_state 		<= present_state & 32'hFFFF_F0F9;	// clear [11, 10, 9, 8, ...2, 1]
+		else if (software_reset[1])                              // software reset[1]                      
+			present_state 		<= present_state & 32'hFFFF_FFFE;	// clear [0]		
+ 		else 
 			present_state 		<= present_state;
 	end  	
 
@@ -663,6 +675,7 @@ module sd_host_controller(
 //			normal_int_status[7] <= 1'b0; // Card Removal int
 			normal_int_status		<= {16{1'b0}};
 		// The following else ifs are for enabling the bits.
+		// Bit 0.
 		else if (normal_int_status_enb[0] && 							// if enabled
 					(!present_state[0] && present_state_z1[0]) && 	// falling edge 
 					!error_int_status[1]) 	 								// and no CRC error 
@@ -670,6 +683,7 @@ module sd_host_controller(
 			// (RWC1 command).  Command Inhibit (CMD) from Present State Reg. 
 			// goes from 1 to 0 indicating a command was successful.
 			normal_int_status	 	<= normal_int_status | 16'h0001;	
+		// Bit 1.
 		else if (normal_int_status_enb[1] && // if enabled
 						// DAT Line Active changed.
 					((!present_state[2] && present_state_z1[2]) || 	// falling edge
@@ -714,10 +728,10 @@ module sd_host_controller(
 			else  							// leave everything as is
 				normal_int_status <= normal_int_status;
 		end
-		else if (software_reset[1])                              // clear bit if 1 for software reset
-			normal_int_status    <= normal_int_status & 16'hFFFE;	// Command Complete Int	
-		else if (software_reset[2])                              // clear bit if 1 for software reset
-			normal_int_status    <= normal_int_status & 16'hFFC1;	// 	
+		else if (software_reset[1])                              // clear bit if 1 for software reset (cmd_line)
+			normal_int_status    <= normal_int_status & 16'hFFFE;	// Command Complete Int [...0]	
+		else if (software_reset[2])                              // clear bit if 2 for software reset (cmd_dat)
+			normal_int_status    <= normal_int_status & 16'hFFC1;	// [...5,4,3,2,1..]	
 		else  // default case
 			normal_int_status 	<= normal_int_status;
 //			normal_int_status[1] <= normal_int_status[1];

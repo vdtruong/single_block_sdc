@@ -1191,8 +1191,8 @@ module sd_host_bus_driver
 		.fin_a_cmd_strb(fin_a_cmd_strb), 
 		.cmd_index(cmd_index), 
 		.cmd_with_tf_compl_int(cmd_with_tf_compl_int), 	 
-		.end_bit_det_strb(end_bit_det_strb),	// finished sending out command
-		
+		.end_bit_det_strb(end_bit_det_strb),				// finished sending out command
+		.issue_abort_cmd_flag(issue_abort_cmd_flag),
 		// For the Host Controller memory map
 		.rd_reg_index(rd_reg_index_fin), 
 		.rd_reg_input(rd_reg_input), 
