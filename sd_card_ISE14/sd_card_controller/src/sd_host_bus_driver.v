@@ -1132,7 +1132,7 @@ module sd_host_bus_driver
 			issue_abort_cmd_flag <= 1'b0;
 		else if (iss_abrt_cmd) 
 			issue_abort_cmd_flag <= 1'b1;
-		else if (fin_a_cmd_strb) 
+		else if (fin_cmnd_strb) 
 			issue_abort_cmd_flag <= 1'b0;
 	end
    
@@ -1192,7 +1192,7 @@ module sd_host_bus_driver
 		.cmd_index(cmd_index), 
 		.cmd_with_tf_compl_int(cmd_with_tf_compl_int), 	 
 		.end_bit_det_strb(end_bit_det_strb),				// finished sending out command
-		.issue_abort_cmd_flag(issue_abort_cmd_flag),
+		.issue_abort_cmd_flag(issue_abort_cmd_flag),		// for cmd12
 		// For the Host Controller memory map
 		.rd_reg_index(rd_reg_index_fin), 
 		.rd_reg_input(rd_reg_input), 
@@ -1202,11 +1202,10 @@ module sd_host_bus_driver
 		.wr_reg_index(wr_reg_index_fin), 
 		.wr_reg_output(wr_reg_output_fin), 
 		.reg_attr(reg_attr_fin), 
-
 		//.resp_reg_data(), // from Response register (010h)
 		.err_int_stat(/*err_stat*/), 
-		.fin_a_cmd_proc(fin_a_cmd_proc),
-		.fin_cmnd_strb(fin_cmnd_strb)
+		.fin_a_cmd_proc(fin_a_cmd_proc),	// output
+		.fin_cmnd_strb(fin_cmnd_strb)		// output
 		);								  
 	
 	// This is for sending a command with data.

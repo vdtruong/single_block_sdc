@@ -84,7 +84,7 @@ module data_tf_using_adma(
 	reg 	[31:0]	wr_reg_output_reg; 	   // for the sd host controller memory map
 	reg 				cmd_complete;
 	reg 				tf_complete;
-   reg   [15:0]	command;
+   reg   [15:0]	command;						// Command register (00Eh).
 	
 	reg	[11:0]	rd_reg_index_int; 	      // for this module own reading
 	// indicates we are reading the 1st reg, then 2nd.
@@ -261,6 +261,8 @@ module data_tf_using_adma(
 	// Select single block or multiple blocks write/read base on tf_mode.
 	// Bit 5 is for multiple (1) or single (0) transfer.
 	// Bit 4 is for read (1) or write (0).
+	// command is the SD card Command register 00E.  It will be sent to the sd
+	// card.
 	always@(tf_mode[5:4])
 	begin
 		case (tf_mode[5:4])

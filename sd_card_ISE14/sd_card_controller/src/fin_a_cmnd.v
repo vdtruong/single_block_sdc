@@ -28,6 +28,7 @@ module fin_a_cmnd(
    input		[5:0]		cmd_index,
 	input 				cmd_with_tf_compl_int, 
 	input					end_bit_det_strb,	// finished sending out command
+	input					issue_abort_cmd_flag,
 	// For use with sd_host_controller.
 	output	[11:0]	rd_reg_index,
 	input 	[127:0]	rd_reg_input,
@@ -201,26 +202,27 @@ module fin_a_cmnd(
 	);		  
 	
 	// State machine to finalize a command.
-   parameter state_start  						= 16'b0000_0000_0000_0001;
-   parameter state_cmd_compl_int  			= 16'b0000_0000_0000_0010;
-   parameter state_rd_wait  					= 16'b0000_0000_0000_0100;
-   parameter state_clr_cmd_compl_status 	= 16'b0000_0000_0000_1000;
-   parameter state_wr_wait					 	= 16'b0000_0000_0001_0000;
-   parameter state_get_response_data		= 16'b0000_0000_0010_0000;
-   parameter state_rd_wait2 					= 16'b0000_0000_0100_0000;
-   parameter state_wait_for_tf_compl_int 	= 16'b0000_0000_1000_0000;	
-   parameter state_rd_wait3 					= 16'b0000_0001_0000_0000;
-   parameter state_clr_tf_compl_status 	= 16'b0000_0010_0000_0000;
-   parameter state_wr_wait2				 	= 16'b0000_0100_0000_0000;
-   parameter state_chk_resp_dat 				= 16'b0000_1000_0000_0000;
-   parameter state_rd_wait4 					= 16'b0001_0000_0000_0000;	  
-   parameter state_no_err 						= 16'b0010_0000_0000_0000;
-   parameter state_err 							= 16'b0100_0000_0000_0000;
-   parameter state_end 							= 16'b1000_0000_0000_0000;
+   parameter state_start  						= 17'b0_0000_0000_0000_0001;
+   parameter state_skip_sm_qry  				= 17'b0_0000_0000_0000_0010;	// Decide if needs to skip state machine.
+	parameter state_cmd_compl_int  			= 17'b0_0000_0000_0000_0100;
+	parameter state_rd_wait  					= 17'b0_0000_0000_0000_1000;
+   parameter state_clr_cmd_compl_status 	= 17'b0_0000_0000_0001_0000;
+   parameter state_wr_wait					 	= 17'b0_0000_0000_0010_0000;
+   parameter state_get_response_data		= 17'b0_0000_0000_0100_0000;
+   parameter state_rd_wait2 					= 17'b0_0000_0000_1000_0000;
+   parameter state_wait_for_tf_compl_int 	= 17'b0_0000_0001_0000_0000;	
+   parameter state_rd_wait3 					= 17'b0_0000_0010_0000_0000;
+   parameter state_clr_tf_compl_status 	= 17'b0_0000_0100_0000_0000;
+   parameter state_wr_wait2				 	= 17'b0_0000_1000_0000_0000;
+   parameter state_chk_resp_dat 				= 17'b0_0001_0000_0000_0000;
+   parameter state_rd_wait4 					= 17'b0_0010_0000_0000_0000;	  
+   parameter state_no_err 						= 17'b0_0100_0000_0000_0000;
+   parameter state_err 							= 17'b0_1000_0000_0000_0000;
+   parameter state_end 							= 17'b1_0000_0000_0000_0000;
 
    (* FSM_ENCODING="ONE-HOT", SAFE_IMPLEMENTATION="YES", 
 	SAFE_RECOVERY_STATE="state_start" *) 
-	reg [15:0] state = state_start;
+	reg [16:0] state = state_start;
 
    always@(posedge clk)
       if (reset) begin
@@ -238,11 +240,11 @@ module fin_a_cmnd(
       end
       else
          (* PARALLEL_CASE *) case (state)
-				state_start : begin				// 16'b0000_0000_0000_0001
+				state_start : begin				// 0x00001
                if (fin_a_cmd_strb)
-                  state 				<= state_cmd_compl_int;
-               else if (!fin_a_cmd_strb)
-                  state 				<= state_start;
+                  state 				<= state_skip_sm_qry;
+               /*else if (!fin_a_cmd_strb)
+                  state 				<= state_start;*/
                else
                   state 				<= state_start;
                // Outputs
@@ -255,7 +257,22 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;
 					err_int_stat_reg		<= 16'h0000;	// reset to 0
 				end
-            state_cmd_compl_int : begin			// 16'b0000_0000_0000_0010
+            state_skip_sm_qry : begin				// 0x00002
+               if (issue_abort_cmd_flag)
+                  state 				<= state_end;
+               else
+                  state 				<= state_cmd_compl_int;
+               // Outputs
+					rd_reg_index_reg 		<= 12'h000;
+					wr_reg_strb_reg		<= 1'b0;
+					wr_reg_index_reg 		<= 12'h000;
+					wr_reg_output_reg		<= {32{1'b0}};
+					fin_a_cmd_proc_reg	<= 1'b0;
+					fin_cmnd_strb_reg		<= 1'b0;
+					rd_reg_strb				<= 1'b0;
+					err_int_stat_reg		<= 16'h0000;	// reset to 0
+				end
+				state_cmd_compl_int : begin			// 0x00004
                state 					<= state_rd_wait;
                // Outputs								
 					// read normal int status register
@@ -269,7 +286,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b1;	 	// strobe to start waiting
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_rd_wait : begin					// 16'b0000_0000_0000_0100
+            state_rd_wait : begin					// 0x00008
 					// Wait until we get a command complete interrupt.	
 					// We have to wait until we get a response from the
 					// command we just sent, ie from the sd card.
@@ -298,7 +315,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_clr_cmd_compl_status : begin	// 16'b0000_0000_0000_1000
+            state_clr_cmd_compl_status : begin	// 0x00010
                state 					<= state_wr_wait;
                // Outputs
 					rd_reg_index_reg 		<= 12'h000;
@@ -312,7 +329,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;	
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_wr_wait : begin					// 16'b0000_0000_0001_0000
+            state_wr_wait : begin					// 0x00020
                if (read_clks_tout)
                   state 				<= state_get_response_data;
                else if (!read_clks_tout)
@@ -331,7 +348,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;	
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_get_response_data : begin	// 16'b0000_0000_0010_0000	
+            state_get_response_data : begin	// 0x00040	
                state 					<= state_rd_wait2;
                // Outputs
 					rd_reg_index_reg 		<= 12'h010; // Response register
@@ -344,7 +361,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b1;	
 					err_int_stat_reg		<= 16'h0000;				
             end
-            state_rd_wait2 : begin				// 16'b0000_0000_0100_0000
+            state_rd_wait2 : begin				// 0x00080
 					// if time is up and cmd_with_tf_compl_int is true
 					// go to state_wait_for_tf_compl_int.
                if (read_clks_tout && cmd_with_tf_compl_int)
@@ -367,7 +384,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;
 					err_int_stat_reg		<= 16'h0000;					
             end
-            state_wait_for_tf_compl_int : begin	// 16'b0000_0000_1000_0000  
+            state_wait_for_tf_compl_int : begin	// 0x00100  
                state 					<= state_rd_wait3;
                // Outputs
 					rd_reg_index_reg 		<= 12'h030; 
@@ -380,7 +397,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b1;
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_rd_wait3 : begin					// 16'b0000_0001_0000_0000
+            state_rd_wait3 : begin					// 0x00200
                if (read_clks_tout && tf_compl)
                   state 				<= state_clr_tf_compl_status;
                else if (!read_clks_tout)
@@ -398,7 +415,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_clr_tf_compl_status : begin	// 16'b0000_0010_0000_0000 
+            state_clr_tf_compl_status : begin	// 0x00400 
                state 					<= state_wr_wait2;
                // Outputs
 					rd_reg_index_reg 		<= 12'h000;
@@ -412,7 +429,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;	
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_wr_wait2 : begin					// 16'b0000_0100_0000_0000
+            state_wr_wait2 : begin					// 0x00800
                if (read_clks_tout)
                   state 				<= state_chk_resp_dat;
                else if (!read_clks_tout)
@@ -431,7 +448,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;	
 					err_int_stat_reg		<= 16'h0000;
             end
-            state_chk_resp_dat : begin				// 16'b0000_1000_0000_0000
+            state_chk_resp_dat : begin				// 0x01000
 					state 					<= state_rd_wait4;
                // Outputs							  
 					// Read the Error Interrupt Status Register
@@ -445,7 +462,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b1;	
 					err_int_stat_reg		<= 16'h0000;				
             end
-            state_rd_wait4 : begin					// 16'b0001_0000_0000_0000 									  
+            state_rd_wait4 : begin					// 0x02000 									  
                if (read_clks_tout && (!err))
                   state 				<= state_no_err;	  									  
                else if (read_clks_tout && err)
@@ -465,7 +482,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0;	
 					err_int_stat_reg		<= 16'h0000;				
             end										
-            state_no_err : begin						// 16'b0010_0000_0000_0000
+            state_no_err : begin						// 0x04000
                state 					<= state_start;
 					// Outputs
 					rd_reg_index_reg 		<= 12'h000;
@@ -480,7 +497,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0; 
 					err_int_stat_reg		<= 16'h0000;
             end            							
-            state_err : begin							// 16'b0100_0000_0000_0000
+            state_err : begin							// 0x08000
                state 					<= state_start;
 					// Outputs
 					rd_reg_index_reg 		<= 12'h000;
@@ -495,7 +512,7 @@ module fin_a_cmnd(
 					rd_reg_strb				<= 1'b0; 
 					err_int_stat_reg		<= rd_reg_input[15:0];
             end            
-            state_end : begin							// 16'b1000_0000_0000_0000
+            state_end : begin							// 0x10000
                state 					<= state_start;
 					// Outputs
 					rd_reg_index_reg 		<= 12'h000;

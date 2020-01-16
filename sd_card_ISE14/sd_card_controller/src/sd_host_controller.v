@@ -269,7 +269,7 @@ module sd_host_controller(
 	// the host controller should send the CMD12 automatically
 	// to stop the transfer.  This is done after the last block
 	// has been sent/receive to/from the SD card.
-	reg				end_descr;
+	reg				end_descr_strb;
   	reg         	dat_tf_done_z1;      	// delay
 	
 	// Wires	  
@@ -336,7 +336,8 @@ module sd_host_controller(
 		des_fifo_rd_strb_z5			<= 1'b0; 
 		des_fifo_rd_strb_z6			<= 1'b0;
 		dat_tf_done_z1			      <= 1'b0;
-      //snd_auto_cmd12_strb 	      <= 1'b0;
+      end_descr_strb					<= 1'b0;
+		//snd_auto_cmd12_strb 	      <= 1'b0;
 
 		// Begin of map register initializing.
 		sdma_system_addr				<= {32{1'b0}};
@@ -482,13 +483,15 @@ module sd_host_controller(
 		.strb(fin_64sdclks_strb) 
 	);   
     
-	// Parse for end_descr.
+	// Parse for end_descr_strb.
    always @(posedge clk) begin
       if (reset)
-         end_descr <= 1'b0;
+         end_descr_strb <= 1'b0;
       else if (des_fifo_rd_strb_z5) // wait for 5 clocks
-         end_descr <= des_rd_data[1];
-   end	
+         end_descr_strb <= des_rd_data[1];
+   	else if (des_fifo_rd_strb_z6) // wait for 6 clocks
+         end_descr_strb <= 1'b0;		// creates a strobe
+	end	
 	
 	////////////////////////////////////////////////////////////////////////////
 	// Start of the register map updating.
@@ -566,8 +569,8 @@ module sd_host_controller(
 		// new_resp_pkt_strb indicates the end bit of the command response.
 		// Use falling edge because new_resp_pkt_strb is from the sdc_clock. 							  
 		// Do not clear if command is cmd12 nor cmd23.
-		else if (((!new_resp_pkt_strb && new_resp_pkt_strb_z1) || // falling edge						// and not cmd12		
-					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1)) /*|| software_reset[1])*/ && (command[13:8] != 6'h0C)) 
+		else if ((((!new_resp_pkt_strb && new_resp_pkt_strb_z1) || // falling edge	// and not cmd12 or software_reset[1]		
+					(!new_resp_2_pkt_strb && new_resp_2_pkt_strb_z1)) && (command[13:8] != 6'h0C)) || software_reset[1]) 
 			present_state 		<= present_state & 32'hFFFF_FFFE;
 		
 		// Command Inhibit (DAT) bit.  Bit 1. present_state[1].
@@ -601,7 +604,7 @@ module sd_host_controller(
 		//	present_state 		<= present_state & 32'hFFFF_FFFB;   		
 		// In the case of ADMA2, the last block is designated by the last
 		// transfer of Descriptor Table.
- 		else if (end_descr)                                    
+ 		else if (end_descr_strb)                                    
 			present_state 		<= present_state & 32'hFFFF_FFFB;   
  	
  		// Bit 9.  Read Transfer Active.
@@ -610,7 +613,7 @@ module sd_host_controller(
 			present_state	 	<= present_state | 32'h0000_0200;
 		// In the case of ADMA2, the last block is designated by the last
 		// transfer of Descriptor Table.
- 		else if (end_descr)                                    
+ 		else if (end_descr_strb)                                    
 			present_state 		<= present_state & 32'hFFFF_FDFF;   
 
  		// Bit 10.  Write Transfer Active.
@@ -619,7 +622,7 @@ module sd_host_controller(
 			present_state	 	<= present_state | 32'h0000_0100;
 		// In the case of ADMA2, the last block is designated by the last
 		// transfer of Descriptor Table.
- 		else if (end_descr)                                    
+ 		else if (end_descr_strb)                                    
 			present_state 		<= present_state & 32'hFFFF_FEFF;   
 
  		// If card is inserted, bit 16                           
@@ -631,8 +634,8 @@ module sd_host_controller(
 //		Clear bits when software_reset is set.
 		else if (software_reset[2])                              // software reset[2]                      
 			present_state 		<= present_state & 32'hFFFF_F0F9;	// clear [11, 10, 9, 8, ...2, 1]
-		else if (software_reset[1])                              // software reset[1]                      
-			present_state 		<= present_state & 32'hFFFF_FFFE;	// clear [0]		
+		//else if (software_reset[1])                              // software reset[1]                      
+		//	present_state 		<= present_state & 32'hFFFF_FFFE;	// clear [0]		
  		else 
 			present_state 		<= present_state;
 	end  	

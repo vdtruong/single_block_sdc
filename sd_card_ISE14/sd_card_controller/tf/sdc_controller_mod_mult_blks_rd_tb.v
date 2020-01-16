@@ -1168,7 +1168,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
 		// Wait a while before starting to send back data.
-		#5_000_000;	// 5 ms
+		#1_000_000;	// 1 ms
 		
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
@@ -1215,10 +1215,10 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 10 us, send the cmd12 response.
+		// After 1 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
-		#10000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#1000		IO_SDC1_CMD_in		= 1'b0; 	// start bit
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
 		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
@@ -1353,7 +1353,7 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
 		// Wait a while before starting to send back data.
-		#5_000_000;	// 5 ms
+		#1_000_000;	// 1 ms
 		
 		// Data returning from sdc at 1.56 MHz rate.
 		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
@@ -1400,10 +1400,10 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		// After receiving, release D0_in.
 		//IO_SDC1_D0_in = 1'b1;
 
-		// After 10 us, send the cmd12 response.
+		// After 1 us, send the cmd12 response.
 		// Response from SD Card for CMD12. x0c
 		//-------------------------------------  
-		#10000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#1000		IO_SDC1_CMD_in		= 1'b0; 	// start bit
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
 		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
 		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
@@ -1463,8 +1463,376 @@ module sdc_controller_mod_multi_blks_rd_tb;
 		#640		IO_SDC1_CMD_in		= 1'b1;	// 
 		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
 		//-------------------------------------	
-	
-	end	// end of intial loop
       
+		////////////////////////////////////////
+		//      The third multiple blocks read.
+		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
+		#20000		tf_mode		      = 36'h0000C0035;	
+		// We need to set a starting read ddress.
+		#6000 		sdc_rd_addr			= 32'h00030b2d;
+		// Start the transfer process.
+		// This will start the data_tf module.
+		#200000	start_data_tf_strb	= 1'b1;					 
+		#20		start_data_tf_strb	= 1'b0;		
+		// Response from SD Card for CMD18. x12
+		//-------------------------------------  
+		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b1; 	//	1 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 2	cmd18 in hex x12
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
+		// Wait a while before starting to send back data.
+		#1_000_000;	// 1 ms
+		
+		// Data returning from sdc at 1.56 MHz rate.
+		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
+			// This is for 1 block of data, 512 bytes.
+			// Each word of data is 2 clocks late.
+			// Therefore, we add 2*64 bits to the count.
+			for (i=0; i<4115; i=i+1) begin
+				// Start bit.
+				if (i == 0) begin
+					#640 IO_SDC1_D0_in = 1'b0; 
+ 				end
+				// Start of data block.
+				else if (i>0 && i<4098) begin 
+					if (i & 1) begin	// If number is odd.
+						#640 IO_SDC1_D0_in = 1'b1;
+	 				end
+					else begin
+						#640 IO_SDC1_D0_in = 1'b0;
+	 				end
+		 		end						
+				// end of 1 block of data
+				// start of crc
+				else if (i> 4097 && i<4114) begin	
+					// 16 bits CRC after every block.
+					// Need to do this with each bit.
+					if (i & 1) begin	// If number is odd.
+						#640 IO_SDC1_D0_in = 1'b0;
+	 				end
+					else begin
+						#640 IO_SDC1_D0_in = 1'b1;
+	 				end
+				end
+				// end of crc
+				// stop bit
+				else if (i == 4114) begin
+					#640 IO_SDC1_D0_in = 1'b1;	
+		 		end
+			end
+			// End of one block of data.
+			#1_000_000; // wait before starting another block, 1 ms
+ 		end
+		// Done with 16 blocks of data.
+		
+		// After receiving, release D0_in.
+		//IO_SDC1_D0_in = 1'b1;
+
+		// After 1 us, send the cmd12 response.
+		// Response from SD Card for CMD12. x0c
+		//-------------------------------------  
+		#1000		IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// c	cmd12 in hex x0c
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
+		
+		////////////////////////////////////////
+		//      The fourth multiple blocks read.
+		// 0x0018   0x0000C0035 transfer mode, reading multiple blocks
+		#20000		tf_mode		      = 36'h0000C0035;	
+		// We need to set a starting read ddress.
+		#6000 		sdc_rd_addr			= 32'h00030b2d;
+		// Start the transfer process.
+		// This will start the data_tf module.
+		#200000	start_data_tf_strb	= 1'b1;					 
+		#20		start_data_tf_strb	= 1'b0;		
+		// Response from SD Card for CMD18. x12
+		//-------------------------------------  
+		#50000	IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b1; 	//	1 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 2	cmd18 in hex x12
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
+		// Wait a while before starting to send back data.
+		#1_000_000;	// 1 ms
+		
+		// Data returning from sdc at 1.56 MHz rate.
+		for (j=0; j<16; j=j+1) begin	// need to do 16 blocks
+			// This is for 1 block of data, 512 bytes.
+			// Each word of data is 2 clocks late.
+			// Therefore, we add 2*64 bits to the count.
+			for (i=0; i<4115; i=i+1) begin
+				// Start bit.
+				if (i == 0) begin
+					#640 IO_SDC1_D0_in = 1'b0; 
+ 				end
+				// Start of data block.
+				else if (i>0 && i<4098) begin 
+					if (i & 1) begin	// If number is odd.
+						#640 IO_SDC1_D0_in = 1'b1;
+	 				end
+					else begin
+						#640 IO_SDC1_D0_in = 1'b0;
+	 				end
+		 		end						
+				// end of 1 block of data
+				// start of crc
+				else if (i> 4097 && i<4114) begin	
+					// 16 bits CRC after every block.
+					// Need to do this with each bit.
+					if (i & 1) begin	// If number is odd.
+						#640 IO_SDC1_D0_in = 1'b0;
+	 				end
+					else begin
+						#640 IO_SDC1_D0_in = 1'b1;
+	 				end
+				end
+				// end of crc
+				// stop bit
+				else if (i == 4114) begin
+					#640 IO_SDC1_D0_in = 1'b1;	
+		 		end
+			end
+			// End of one block of data.
+			#1_000_000; // wait before starting another block, 1 ms
+ 		end
+		// Done with 16 blocks of data.
+		
+		// After receiving, release D0_in.
+		//IO_SDC1_D0_in = 1'b1;
+
+		// After 1 us, send the cmd12 response.
+		// Response from SD Card for CMD12. x0c
+		//-------------------------------------  
+		#1000		IO_SDC1_CMD_in		= 1'b0; 	// start bit
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// transmission bit	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of command index		
+		#640		IO_SDC1_CMD_in		= 1'b0; 	//	0
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// c	cmd12 in hex x0c
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// start of card status response
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	
+		#640		IO_SDC1_CMD_in		= 1'b1;	// ready_for_data
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// CRC next 7 bits
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	
+		#640		IO_SDC1_CMD_in		= 1'b0; 	// 	1
+		#640		IO_SDC1_CMD_in		= 1'b1; 	// 
+		//-------------------------------------
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 	3
+		#640		IO_SDC1_CMD_in		= 1'b0;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// 
+		#640		IO_SDC1_CMD_in		= 1'b1;	// end bit
+		//-------------------------------------	
+
+	end	// end of intial loop
+
 endmodule
 
