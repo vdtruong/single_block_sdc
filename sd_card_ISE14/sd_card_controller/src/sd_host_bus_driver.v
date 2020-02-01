@@ -1073,7 +1073,7 @@ module sd_host_bus_driver
 				argument	<= {{20{1'b0}},4'h1,8'hAA};		
 			else if (cmd_index == 6'h0D)                       // send_status  										 
 				argument	<= {rca,{16{1'b0}}};
-			else if (cmd_index == 6'h11)                       // read_single_block
+			else if (cmd_index == 6'h11 || cmd_index == 6'h12) // read_single_block or read mult. blks
 				// Address to be read.
 				argument	<= sdc_rd_addr;					
 			else if (cmd_index == 6'h18 || cmd_index == 6'h19)	// write_block or write_multiple_blocks

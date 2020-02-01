@@ -324,7 +324,7 @@ module data_tf_using_adma(
 			wr_reg_strb_reg					<= 1'b0;
 			wr_reg_index_reg					<= 12'h000;
 			wr_reg_output_reg					<= {32{1'b0}};
-			reg_attr_reg						<= 3'h0; // type of bit write     
+			reg_attr_reg						<= 3'h0; 							// type of bit write     
          wr_descr_table_strb_reg       <= 1'b0;
          strt_fifo_strb				      <= 1'b0;
          strt_adma_strb	               <= 1'b0;
@@ -347,7 +347,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg			<= 12'h000;
 					wr_reg_output_reg			<= {32{1'b0}};
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;      
@@ -363,7 +363,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg			<= 12'h000;
 					wr_reg_output_reg			<= {32{1'b0}};
-					reg_attr_reg				<= 3'h0; // type of bit write 
+					reg_attr_reg				<= 3'h0; 							// type of bit write 
                // start to write the descriptor tables in bram
                // this will take 47 clocks.
                wr_descr_table_strb_reg <= 1'b1;
@@ -383,7 +383,7 @@ module data_tf_using_adma(
 					wr_reg_index_reg			<= 12'h058;
 					// Location of first decriptor line, 00000000 00000001h.
 					wr_reg_output_reg			<= 32'h00000001; 
-					reg_attr_reg				<= 3'h0; // type of bit write
+					reg_attr_reg				<= 3'h0; 							// type of bit write
                strt_fifo_strb			   <= 1'b0;     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
@@ -406,7 +406,7 @@ module data_tf_using_adma(
 					wr_reg_index_reg			<= 12'h058;
 					// Location of first decriptor line, 00000000 00000001h.
 					wr_reg_output_reg			<= 32'h00000001; 
-					reg_attr_reg				<= 3'h0; // type of bit write           
+					reg_attr_reg				<= 3'h0; 							// type of bit write           
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;
@@ -424,7 +424,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg			<= 12'h004;
 					wr_reg_output_reg			<= {{20{1'b0}}, tf_blk_size};
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;      
@@ -440,7 +440,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b1;
 					wr_reg_index_reg			<= 12'h006;
 					wr_reg_output_reg			<= {{16{1'b0}}, blk_count};
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;      
@@ -461,7 +461,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg			<= 12'h006;
 					wr_reg_output_reg			<= {{16{1'b0}}, blk_count};
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;      
@@ -476,8 +476,8 @@ module data_tf_using_adma(
 					rd_reg_index_reg 			<= 12'h000; 
 					wr_reg_strb_reg			<= 1'b1;
 					wr_reg_index_reg 			<= 12'h008;
-					wr_reg_output_reg			<= argument;	// Data Address
-					reg_attr_reg				<= 3'h0; 		// type of bit write     
+					wr_reg_output_reg			<= argument;						// Data Address
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;
@@ -498,7 +498,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg 			<= 12'h008;
 					wr_reg_output_reg			<= argument;
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0; 
@@ -514,7 +514,7 @@ module data_tf_using_adma(
 					wr_reg_strb_reg			<= 1'b1;
 					wr_reg_index_reg 			<= 12'h00C;
 					wr_reg_output_reg			<= {{16{1'b0}}, tf_mode};
-					reg_attr_reg				<= 3'h0; // type of bit write     
+					reg_attr_reg				<= 3'h0; 							// type of bit write     
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0; 
@@ -643,7 +643,7 @@ module data_tf_using_adma(
 					wr_reg_index_reg 			<= 12'h030;
 					// write 1 to clear, 0 to leave unchanged
 					wr_reg_output_reg			<= {{16{1'b0}},{15{1'b0}},1'b1};
-					reg_attr_reg				<= 3'h3; // RW1C                   
+					reg_attr_reg				<= 3'h3; 							// RW1C                   
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;                      
@@ -665,7 +665,7 @@ module data_tf_using_adma(
 					wr_reg_index_reg 			<= 12'h030;
 					// write 1 to clear, 0 to leave unchanged
 					wr_reg_output_reg			<= {{16{1'b0}},{15{1'b0}},1'b1};
-					reg_attr_reg				<= 3'h3; // RW1C                   
+					reg_attr_reg				<= 3'h3; 							// RW1C                   
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;                      
@@ -685,11 +685,11 @@ module data_tf_using_adma(
 					// This is from the Card Status field of the response.
 					// We can activate the ADMA state machine if the card is
 					// ready to accept data.
-					rd_reg_index_reg 			<= 12'h010; // Response register
+					rd_reg_index_reg 			<= 12'h010; 						// Response register
 					wr_reg_strb_reg			<= 1'b0;
 					wr_reg_index_reg			<= 12'h000;
 					wr_reg_output_reg			<= {32{1'b0}};
-					reg_attr_reg				<= 3'h0;    // type of bit write      
+					reg_attr_reg				<= 3'h0;    						// type of bit write      
                wr_descr_table_strb_reg <= 1'b0;
                strt_fifo_strb				<= 1'b0;
                strt_adma_strb	         <= 1'b0;                      
@@ -874,7 +874,7 @@ module data_tf_using_adma(
                strt_adma_strb	         <= 1'b0;                      
 					dat_tf_adma_proc_reg		<= 1'b0;	
             end
-            default: begin  // Fault Recovery
+            default: begin  													// Fault Recovery
                state 						<= ste_start;
                //<outputs> <= <values>;
 					issue_sd_cmd_strb_reg	<= 1'b0;

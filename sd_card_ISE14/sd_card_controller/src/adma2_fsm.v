@@ -223,12 +223,12 @@ module adma2_fsm(
 	// After we send out one block of data, wait for 20 ms before checking
 	// to see if card is ready.
 	//-------------------------------------------------------------------------
-	defparam waitCntr.dw 	= 20; // 20 bits; for simulation
-	//defparam waitCntr.dw 	= 24; // 24 bits; for integration
+	//defparam waitCntr.dw 	= 20; // 20 bits; for simulation
+	defparam waitCntr.dw 	= 24; // 24 bits; for integration
 	// Change this to reflect the number of counts you want.
 	// Count up to this number, starting at zero.
-	defparam waitCntr.max	= 20'hF4240; // 20 ms = 1M cnts - use this for simulation.	
-	//defparam waitCntr.max	= 24'h2DC6C0; // 60 ms = 3M cnts - use this for integration (real thing).
+	//defparam waitCntr.max	= 20'hF4240; // 20 ms = 1M cnts - use this for simulation.	
+	defparam waitCntr.max	= 24'h2DC6C0; // 60 ms = 3M cnts - use this for integration (real thing).
 	//-------------------------------------------------------------------------
 	CounterSeq waitCntr(
 		.clk(clk), 		                  // Clock input 50 MHz 
@@ -468,7 +468,8 @@ module adma2_fsm(
                snd_cmd13_strb	            <= 1'b0;
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
-            end	state_qry_stat : begin  // x0400
+            end	
+				state_qry_stat : begin  		// x0400
 					// Send out cmd13 to see if card is ready for next data.          
                state 						   <= state_chk_stat;   
                //<outputs> <= <values>;   
@@ -480,7 +481,7 @@ module adma2_fsm(
                snd_cmd13_strb	            <= 1'b1;
                strt_wait_cntr             <= 1'b0;
                wait_cnt                   <= 4'h0;
-               end
+            end
             state_chk_stat : begin   		// x0800
 					// Stay here and wait for ready from sd card.
                // If response is not ready and we have not time out,
