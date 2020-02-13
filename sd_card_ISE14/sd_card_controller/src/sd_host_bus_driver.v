@@ -137,17 +137,17 @@ module sd_host_bus_driver
 	reg		      issue_abort_cmd_flag;
 	reg	[11:0]	tf_blk_size;
 	reg	[15:0]	blk_count;									  
-	reg	[63:0]	dat_in;		// holds fifo_data for shifting into crc calculator								  
-	reg				calc_crc;	// flag to calculate CRC								  
-	reg				calc_crc_z1;// delay
-	reg				crc_in;		// crc input bit							
-	reg	[63:0] 	datain;		// either data from puc or crc.
+	reg	[63:0]	dat_in;							// holds fifo_data for shifting into crc calculator								  
+	reg				calc_crc;						// flag to calculate CRC								  
+	reg				calc_crc_z1;					// delay
+	reg				crc_in;							// crc input bit							
+	reg	[63:0] 	datain;							// either data from puc or crc.
 	// Next seven registers are for the host controller reg. map,
 	// internal use.
-	reg	[11:0]	rd_reg_index_int; // for this module own reading
-	reg 	[11:0] 	rd_reg_index_reg;	// for this module own reading
-	reg 	[11:0] 	rd_reg2_index_reg;// for this module own reading
-	reg	[11:0]	rd_reg_indx;		// to assign to output
+	reg	[11:0]	rd_reg_index_int; 			// for this module own reading
+	reg 	[11:0] 	rd_reg_index_reg;				// for this module own reading
+	reg 	[11:0] 	rd_reg2_index_reg;			// for this module own reading
+	reg	[11:0]	rd_reg_indx;					// to assign to output
 	reg				wr_reg_strb_reg;
 	reg	[11:0]	wr_reg_index_reg;
 	reg	[31:0]	wr_reg_output_reg;
@@ -159,21 +159,21 @@ module sd_host_bus_driver
 	reg				card_insrtd_reg_z1;
 	reg				calc_clk_strb;			 
 	reg	[23:0]	req_clk;
-	reg	[23:0]	req_clk_sl; 			// for sensitivity list
+	reg	[23:0]	req_clk_sl; 					// for sensitivity list
 	reg				just_insrtd;
-	reg				just_insrtd_sl;		// for sensitivity list
-	reg				init_suc; 				// card sucessfully initialized
-	reg				init_not_suc; 			// card not sucessfully initialized
-	reg				strt_clk_sup;  		// start clock supply after initializing
+	reg				just_insrtd_sl;				// for sensitivity list
+	reg				init_suc; 						// card sucessfully initialized
+	reg				init_not_suc; 					// card not sucessfully initialized
+	reg				strt_clk_sup;  				// start clock supply after initializing
 	reg				strt_clk_sup_z1;
    reg            strt_snd_data_strb_z1;
 	reg				nxt_dat_strb_z1;													  
-	reg				wr_b_strb_z1;			// delay									  
-	reg				wr_b_strb_z2;			// delay											  
-	reg				rst_crc_calc;			// reset the CRC calculator 
-	reg				str_crc_strb_z1;		// delay							 
-	reg				str_crc_strb_z2;		// delay							 
-	reg				str_crc_strb_z3;		// delay
+	reg				wr_b_strb_z1;					// delay									  
+	reg				wr_b_strb_z2;					// delay											  
+	reg				rst_crc_calc;					// reset the CRC calculator 
+	reg				str_crc_strb_z1;				// delay							 
+	reg				str_crc_strb_z2;				// delay							 
+	reg				str_crc_strb_z3;				// delay
 	reg		      fin_crc_calc_strb_reg;
 	reg		      fin_crc_calc_strb_reg_z1;
 	reg		      fin_crc_calc_strb_reg_z2;
@@ -182,7 +182,8 @@ module sd_host_bus_driver
    reg            blocks_crc_done_strb_z2;   // delay
    reg            blocks_crc_done_strb_z3;   // delay
    reg   [63:0]	des_word;               	// descriptor word
-   // Use these delays to fill up the descriptor tables.
+   reg	[31:0]	dat_addr;						// address to wr or rd from sd card
+	// Use these delays to fill up the descriptor tables.
    reg            wr_descr_table_strb_z1;    // delay	
    reg            wr_descr_table_strb_z2;    // delay	
    reg            wr_descr_table_strb_z3;    // delay	
@@ -1085,7 +1086,18 @@ module sd_host_bus_driver
 			else  										 
 				argument	<= {32{1'b0}};
 		end
-							
+		
+	// Choose write or read address based on tf_mode.
+	always @(posedge clk)
+		begin
+			if (reset)					 			 	  				   							 
+				dat_addr	<= {32{1'b0}};					
+			else if (tf_mode[4])			// If reading from the card.										 
+				dat_addr	<= sdc_rd_addr;
+			else  										 
+				dat_addr	<= sdc_wr_addr;// If writing to the card.
+		end
+					
 	// Combinational output for kind_of_resp, see page 71
 	// of Physical Layer Simplified Specification Version 3.01.
 	// Remember, if cmd_index doesn't change
@@ -1162,13 +1174,13 @@ module sd_host_bus_driver
 		// necessary information from data input from the host.
       // host_tst_cmd_strb_z2 is from PUC command 0x0011.
 		.issue_sd_cmd_strb(host_tst_cmd_strb_z2 || iss_abrt_cmd_z2 || snd_cmd13_strb_z3),
-		.cmd_index(cmd_index), 					// See 2.2.6 Command Reg. (00Eh)
-		.argument(argument),                // input 
-		.command_type(command_type), 			// See 2.2.6 Command Reg. (00Eh) 
-		.data_pres_select(data_pres_select),// See 2.2.6 Command Reg. (00Eh) 
-		.cmd_indx_chk_enb(cmd_indx_chk_enb),// See 2.2.6 Command Reg. (00Eh) 
-		.cmd_crc_chk_enb(cmd_crc_chk_enb), 	// See 2.2.6 Command Reg. (00Eh)
-		.resp_type_select(resp_type_select),// See 2.2.6 Command Reg. (00Eh)
+		.cmd_index(cmd_index), 								// See 2.2.6 Command Reg. (00Eh)
+		.argument(argument),                			// input 
+		.command_type(command_type), 						// See 2.2.6 Command Reg. (00Eh) 
+		.data_pres_select(data_pres_select),			// See 2.2.6 Command Reg. (00Eh) 
+		.cmd_indx_chk_enb(cmd_indx_chk_enb),			// See 2.2.6 Command Reg. (00Eh) 
+		.cmd_crc_chk_enb(cmd_crc_chk_enb), 				// See 2.2.6 Command Reg. (00Eh)
+		.resp_type_select(resp_type_select),			// See 2.2.6 Command Reg. (00Eh)
 		.issue_cmd_with_busy(issue_cmd_with_busy),   // for cmd 12 - input
 		.issue_abort_cmd_flag(issue_abort_cmd_flag), // for cmd 12 - input
 		// For the Host Controller memory map
@@ -1180,7 +1192,7 @@ module sd_host_bus_driver
 		.wr_reg_output(wr_reg_output_iss), 
 		.reg_attr(reg_attr_iss),
 		 
-		.fin_a_cmd_strb(fin_a_cmd_strb),    // output
+		.fin_a_cmd_strb(fin_a_cmd_strb),    			// output
 		.iss_sd_cmd_proc(iss_sd_cmd_proc)
 		);
 		 
@@ -1222,7 +1234,7 @@ module sd_host_bus_driver
 		//.data(/*data*/),	// data from puc (or other host) per strobe 	 	input
 		.tf_blk_size(tf_blk_size), 											   //		input
 		.blk_count(16'h0001), 													   //		input
-		.argument(sdc_wr_addr),	// Data Address 							 			input
+		.argument(dat_addr),															// 	input wr or rd data addr.
 		.tf_mode(tf_mode[15:0]), 												   //    input
       .des_rd_addr(des_rd_addr),                                     //    input
       // You are actually repeating the command below again
