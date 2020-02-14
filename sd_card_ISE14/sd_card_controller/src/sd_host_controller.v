@@ -1470,7 +1470,7 @@ module sd_host_controller(
 		.command(command),						// input
 		.d0_in(D0_in),								// input
 		.adma_end(end_descr) ,					// input
-		//.tf_mode(transfer_mode),				// input
+		.tf_mode(transfer_mode),				// input
 		.latch_wrd_strb(rcv_wrd_rdy_strb),	// output
 		.tfc(tfc_rd),								// output
 		.latch_crc_strb(rcv_crc_rdy_strb),	// output

@@ -41,6 +41,7 @@ module sdc_single_blk_rd_mod(
 	input		[15:0]	command,			// Only starts this state machine if the command is a read command.
 	input					d0_in,			// sd card data line
 	input 				adma_end,		// indicates if we are done with the transfer from ADMA2.		 	
+	input		[15:0]	tf_mode,			// transfer mode
 	//output reg			latch_wrd_strb,// ready to latch 64 bits word into bram.
 	output				latch_wrd_strb,
 	output				tfc,				// transfer of one block is complete
@@ -133,8 +134,10 @@ module sdc_single_blk_rd_mod(
 	always @(posedge sdc_clk) begin
 		if (reset)
 			strt_bit_strb 	<= 1'b0;
-		if (!d0_in && d0_in_z1 && not_strted)		// start bit has been detected from falling edge
-      	strt_bit_strb	<= 1'b1;             
+		// start bit has been detected from falling edge
+		// and only if tf_mode is reading.
+ 		if ((!d0_in && d0_in_z1 && not_strted) && tf_mode[4])		
+			strt_bit_strb	<= 1'b1;             
 		else                          
          strt_bit_strb	<= 1'b0;
 	end
