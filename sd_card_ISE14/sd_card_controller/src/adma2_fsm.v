@@ -221,7 +221,8 @@ module adma2_fsm(
 
 	//-------------------------------------------------------------------------
 	// After we send out one block of data, wait for 20 ms before checking
-	// to see if card is ready.
+	// to see if card is ready.  For integration, use 60 ms.  May use something
+	// faster, need to test out in the future.  But not faster than 20 ms.
 	//-------------------------------------------------------------------------
 	//defparam waitCntr.dw 	= 20; // 20 bits; for simulation
 	defparam waitCntr.dw 	= 24; // 24 bits; for integration

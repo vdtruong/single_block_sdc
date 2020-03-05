@@ -250,7 +250,7 @@ module sd_host_bus_driver
    wire  [4:0]             des_rd_addr;
    wire  [4:0]             des_wr_addr;
 	wire	[SM_ADDR_WD-1:0]  sm_rd_addr; // read system memory addr
-	wire	[SM_ADDR_WD	-1:0]	sm_wr_addr; // write system memory addr
+	wire	[SM_ADDR_WD-1:0]	sm_wr_addr; // write system memory addr
   	//wire 	[SM_ADDR_WD-1:0] 	buffer_cnt;	// how much is in buffer	
 	wire							wr_ram_enb; 	// for the system memory ram
 	wire 	[7:0] 				wr_ram_addr;	// for the system memory ram
@@ -1492,20 +1492,20 @@ module sd_host_bus_driver
 	); 											 
 	
 	//-------------------------------------------------------------------------
-	// We need to calculate the CRC of each packet of data from the PUC.
-	// Each packet is one item from the PUC, which has 64 bits.
+	// We need to calculate the CRC of each word of data from the PUC.
+	// Each word is one register from the PUC, which has 64 bits.
 	//-------------------------------------------------------------------------
 	defparam calcCRCCntr_u11.dw 	= 7;
 	// Change this to reflect the number of counts you want.
 	defparam calcCRCCntr_u11.max	= 7'h3E;	// tweak to match the continuos crc
 	//-------------------------------------------------------------------------
 	CounterSeq calcCRCCntr_u11(
-		.clk(clk), 						// Clock input 50 MHz 
-		.reset(reset),	
+		.clk(clk), 										// Clock input 50 MHz 
+		.reset(reset || start_data_tf_strb),	// Reset counter each time we start a transfer.	
 		.enable(1'b1), 	
-		.start_strb(wr_b_strb_z2),	// strobe to start calculation.  May want to wait one clock.
+		.start_strb(wr_b_strb_z2),					// strobe to start calculation.  May want to wait one clock.
 		.cntr(), 
-		.strb(fin_crc_calc_strb) 	// output, for each word of 64 bits
+		.strb(fin_crc_calc_strb) 					// output, for each word of 64 bits
 	);										
         
   	//---------------------------------------------------------------
@@ -1572,9 +1572,11 @@ module sd_host_bus_driver
 	begin
 		if (reset) 
 			rdy_for_nxt_pkt <= 1'b0;
-		else if (!stop_recv_pkt && fin_crc_calc_strb_reg_z2) 
-			rdy_for_nxt_pkt <= 1'b1;			  
-		else
+		//else if (!stop_recv_pkt && fin_crc_calc_strb_reg_z2) 
+		//	rdy_for_nxt_pkt <= 1'b1;			  
+		else if ((sm_wr_addr < 11'h40F) && fin_crc_calc_strb_reg_z2) 
+			rdy_for_nxt_pkt <= 1'b1;	
+ 		else
 			rdy_for_nxt_pkt <= 1'b0;
 	end																						  
 	
